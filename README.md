@@ -30,4 +30,3 @@ And make sure your code editor has `EditorConfig` support.
 ## Copyright
 
 Lemonion Inc. 2018
-
