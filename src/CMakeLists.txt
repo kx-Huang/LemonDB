@@ -1,9 +1,9 @@
 project(lemondb)
-cmake_minimum_required(VERSION 2.7)
+# cmake_minimum_required(VERSION 2.7)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_FLAGS
-    "-Wall -Wextra -Werror -pedantic -Wno-unused-result -Wconversion -Wno-unused-parameter -O2"
+    "-g -Wall -Wextra -Werror -pedantic -Wno-unused-result -Wconversion -Wno-unused-parameter -O2"
 )
 
 set(SOURCE_FILES
@@ -38,6 +38,10 @@ set(SOURCE_FILES
     query/data/InsertQuery.cpp
     query/data/UpdateQuery.h
     query/data/UpdateQuery.cpp
+    query/data/DeleteQuery.h
+    query/data/DeleteQuery.cpp
+    query/data/SwapQuery.h
+    query/data/SwapQuery.cpp
     utils/formatter.h
     utils/uexception.h)
 add_executable(lemondb main.cpp ${SOURCE_FILES})

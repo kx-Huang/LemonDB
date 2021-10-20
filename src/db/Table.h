@@ -335,6 +335,11 @@ public:
     return result;
   }
 
+  void deleteRow(Iterator it, size_t offset){
+    keyMap.erase(it->key());
+    data.erase(data.begin()+(int)offset);
+  }
+
   /**
    * Get a begin iterator similar to the standard iterator
    * @return begin iterator

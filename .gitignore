@@ -89,3 +89,4 @@ cmake-build-release
 /sample/
 /bin/
 /build/
+/.vscode/
