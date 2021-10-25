@@ -42,6 +42,8 @@ set(SOURCE_FILES
     query/data/DeleteQuery.cpp
     query/data/SwapQuery.h
     query/data/SwapQuery.cpp
+    query/data/SelectQuery.h
+    query/data/SelectQuery.cpp
     utils/formatter.h
     utils/uexception.h)
 add_executable(lemondb main.cpp ${SOURCE_FILES})

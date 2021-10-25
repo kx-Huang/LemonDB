@@ -77,6 +77,10 @@ class SuccessMsgResult : public SuceededQueryResult {
 public:
   bool display() override { return false; }
 
+  explicit SuccessMsgResult (const std::string &msg) {
+    this->msg = msg;
+  }
+
   explicit SuccessMsgResult(const int number) {
     this->msg = R"(ANSWER = "?".)"_f % number;
   }

@@ -9,6 +9,10 @@ constexpr const char *DeleteQuery::qname;
 
 QueryResult::Ptr DeleteQuery::execute() {
   using namespace std;
+  if (this->operands.size() != 0)
+    return make_unique<ErrorMsgResult>(
+        qname, this->targetTable.c_str(),
+        "Invalid number of operands (? operands)."_f % operands.size());
   Database &db = Database::getInstance();
   Table::SizeType counter = 0; // number of affected rows;
   try {
