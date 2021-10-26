@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# clean last test files
+rm -rf sample_dump sample_stdout
+
 # build
 echo "================================================================================="
 printf " Building lemondb...\n"

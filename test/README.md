@@ -6,15 +6,17 @@
 - copy from remote server `/opt/lemondb/sample_stdout` to local `test/ref_stdout`
 
 ```bash
-    scp -r VE482:/opt/lemondb/sample_dump test/ref_dump
+    cd test
+    scp -r Remote:/opt/lemondb/sample_dump ref_dump
+    scp -r Remote:/opt/lemondb/sample_stdout ref_stdout
 ```
 
-# build, benchmark and diff
+# build, run, benchmark and diff
 
 - Build LemonDB to `build/lemondb`
-- Dump output to `test/sample_dump`
-- Diff with `test/ref_dump`
-- Test runtime
+- Save output files to `test/sample_dump` and `test/sample_stdout`
+- Diff with `test/ref_dump` and `test/ref_stdout`
+- Record runtime
 
 ```bash
     cd test
