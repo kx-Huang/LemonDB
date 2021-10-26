@@ -60,7 +60,7 @@ QueryResult::Ptr SelectQuery::execute() {
     return make_unique<ErrorMsgResult>(qname, this->targetTable,
                                        "Unkonwn error '?'."_f % e.what());
   }
-};
+}
 
 std::string SelectQuery::toString() {
   return "QUERY = SELECT " + this->targetTable + "\"";

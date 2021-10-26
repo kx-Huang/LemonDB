@@ -85,6 +85,17 @@ public:
     this->msg = R"(ANSWER = "?".)"_f % number;
   }
 
+  explicit SuccessMsgResult(int *int_arr, size_t size) {
+    std::stringstream ss;
+    ss << "ANSWER = ( ";
+    for (size_t i (0); i < size; i++) {
+      ss << int_arr[i] << " ";
+    }
+    ss << ")";
+    this->msg = ss.str();
+    delete[] int_arr;
+  }
+
   explicit SuccessMsgResult(std::vector<int> results) {
     std::stringstream ss;
     ss << "ANSWER = ( ";
