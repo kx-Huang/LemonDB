@@ -15,6 +15,7 @@
 #include "data/SelectQuery.h"
 #include "data/SumQuery.h"
 #include "data/CountQuery.h"
+#include "data/MinQuery.h"
 #include "management/DropTableQuery.h"
 #include "management/DumpTableQuery.h"
 #include "management/ListTableQuery.h"
@@ -171,9 +172,9 @@ Query::Ptr ComplexQueryBuilder::tryExtractQuery(TokenizedQueryString &query) {
     return std::make_unique<SumQuery>(
             this->targetTable, this->operandToken, this->conditionToken);
   if (operation == "MIN")
-    return std::make_unique<NopQuery>(); // Not implemented
-                                         /*return std::make_unique<MinQuery>(
-                                                 this->targetTable, this->operandToken, this->conditionToken);*/
+    // return std::make_unique<NopQuery>(); // Not implemented
+    return std::make_unique<MinQuery>(
+            this->targetTable, this->operandToken, this->conditionToken);
   if (operation == "MAX")
     return std::make_unique<NopQuery>(); // Not implemented
                                          /*return std::make_unique<MaxQuery>(
