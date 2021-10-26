@@ -89,4 +89,14 @@ cmake-build-release
 /sample/
 /bin/
 /build/
+# env
 /.vscode/
+.DS_Store
+
+# local test
+/test/ref_dump/
+/test/sample_dump/
+/test/sample_stdout/
+
+# tar
+*.zip
