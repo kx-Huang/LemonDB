@@ -95,6 +95,7 @@ cmake-build-release
 
 # local test
 /test/ref_dump/
+/test/ref_stdout/
 /test/sample_dump/
 /test/sample_stdout/
 
