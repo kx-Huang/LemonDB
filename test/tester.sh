@@ -4,12 +4,7 @@
 echo "================================================================================="
 printf " Building lemondb...\n"
 echo "================================================================================="
-<<<<<<< HEAD
-# build
-# cd ..
-=======
 cd ..
->>>>>>> 2894488 (update: tester compare std output & dump file)
 mkdir -p build
 cd build
 cmake -DCMAKE_C_COMPILER=/usr/bin/clang -DCMAKE_CXX_COMPILER=/usr/bin/clang++ ../src
