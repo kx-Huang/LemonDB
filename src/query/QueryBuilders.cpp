@@ -17,6 +17,7 @@
 #include "data/CountQuery.h"
 #include "data/MinQuery.h"
 #include "data/MaxQuery.h"
+#include "data/DuplicateQuery.h"
 #include "management/DropTableQuery.h"
 #include "management/DumpTableQuery.h"
 #include "management/ListTableQuery.h"
@@ -161,9 +162,9 @@ Query::Ptr ComplexQueryBuilder::tryExtractQuery(TokenizedQueryString &query) {
     return std::make_unique<DeleteQuery>(
           this->targetTable, this->operandToken, this->conditionToken);
   if (operation == "DUPLICATE")
-    return std::make_unique<NopQuery>(); // Not implemented
-  /*return std::make_unique<DuplicateQuery>(
-          this->targetTable, this->operandToken, this->conditionToken);*/
+    // return std::make_unique<NopQuery>(); // Not implemented
+  return std::make_unique<DuplicateQuery>(
+          this->targetTable, this->operandToken, this->conditionToken);
   if (operation == "COUNT")
     // return std::make_unique<NopQuery>(); // Not implemented
     return std::make_unique<CountQuery>(

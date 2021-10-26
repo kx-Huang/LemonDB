@@ -3,7 +3,7 @@ echo "==========================================================================
 printf " Building lemondb...\n"
 echo "================================================================================="
 # build
-cd ..
+# cd ..
 mkdir -p build
 cd build
 cmake -DCMAKE_C_COMPILER=/usr/bin/clang -DCMAKE_CXX_COMPILER=/usr/bin/clang++ ../src

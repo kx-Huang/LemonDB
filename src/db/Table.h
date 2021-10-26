@@ -319,6 +319,12 @@ public:
   size_t size() const { return this->data.size(); }
 
   /**
+   * Duplicate rows that are in the vector rows
+   * @return
+   */ 
+  void duplicate(std::vector<Table::Iterator> &rows);
+
+  /**
    * Return the fields in the table
    * @return
    */
