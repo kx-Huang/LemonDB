@@ -46,6 +46,8 @@ set(SOURCE_FILES
     query/data/SelectQuery.cpp
     query/data/SumQuery.h
     query/data/SumQuery.cpp
+    query/data/CountQuery.h
+    query/data/CountQuery.cpp
     utils/formatter.h
     utils/uexception.h)
 add_executable(lemondb main.cpp ${SOURCE_FILES})
