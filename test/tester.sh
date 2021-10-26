@@ -36,8 +36,8 @@ for q in ../sample/*.query ; do
         if [[ $diff_output ]]; then
             echo ""
             echo "================================================================================="
-            echo "[Error] output doesn't match in" "\"sample_dump/${filename}_${f}\""
-            echo ${diff_output}
+            echo "[Error] output doesn't match for" "\"sample_dump/${filename}_${f}\""
+            echo "[Log]" ${diff_output}
             echo "================================================================================="
             exit
             # else
