@@ -1,9 +1,9 @@
-#include "MinQuery.h"
+#include "MaxQuery.h"
 #include "../../db/Database.h"
 
-constexpr const char *MinQuery::qname;
+constexpr const char *MaxQuery::qname;
 
-QueryResult::Ptr MinQuery::execute() {
+QueryResult::Ptr MaxQuery::execute() {
   using namespace std;
   if (this->operands.size() == 0)
     return make_unique<ErrorMsgResult>(
@@ -15,12 +15,12 @@ QueryResult::Ptr MinQuery::execute() {
     auto &table = db[this->targetTable];
     auto result = initCondition(table);
     int *int_arr = new int[(this->operands).size()];
-    for (size_t i (0); i < this->operands.size(); i++) int_arr[i] = INT32_MAX;
+    for (size_t i (0); i < this->operands.size(); i++) int_arr[i] = INT32_MIN;
     if (result.second) {
       for (auto row = table.begin(); row != table.end(); ++row) {
         if (this->evalCondition(*row)) {
           for (size_t i (0); i < this->operands.size(); i++) {
-            if (int_arr[i] > (*row)[this->operands[i]])
+            if (int_arr[i] < (*row)[this->operands[i]])
               int_arr[i] = (*row)[this->operands[i]];
           }
         }
@@ -42,6 +42,6 @@ QueryResult::Ptr MinQuery::execute() {
   }
 }
 
-std::string MinQuery::toString() {
-  return "QUERY = MIN " + this->targetTable + "\"";
+std::string MaxQuery::toString() {
+  return "QUERY = Max " + this->targetTable + "\"";
 }
