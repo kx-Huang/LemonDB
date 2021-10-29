@@ -37,12 +37,12 @@ public:
   bool display() override { return false; }
 };
 
-class SuceededQueryResult : public QueryResult {
+class SucceededQueryResult : public QueryResult {
 public:
   bool success() override { return true; }
 };
 
-class NullQueryResult : public SuceededQueryResult {
+class NullQueryResult : public SucceededQueryResult {
 public:
   bool display() override { return false; }
 
@@ -71,7 +71,7 @@ protected:
   }
 };
 
-class SuccessMsgResult : public SuceededQueryResult {
+class SuccessMsgResult : public SucceededQueryResult {
   std::string msg;
 
 public:
@@ -125,7 +125,7 @@ protected:
   }
 };
 
-class RecordCountResult : public SuceededQueryResult {
+class RecordCountResult : public SucceededQueryResult {
   const int affectedRows;
 
 public:
