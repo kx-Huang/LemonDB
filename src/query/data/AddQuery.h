@@ -11,4 +11,4 @@ public:
   std::string toString() override;
 };
 
-#endif
+#endif // PROJECT_ADDQUERY
