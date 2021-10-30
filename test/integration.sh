@@ -31,7 +31,7 @@ for q in ../sample/*.query ; do
     total_time=$(echo $total_time+$real_time | bc)
     printf "  %-20s   %-10s  \n" $filename $real_time
     # diff output with reference output file
-    diff_output=$(diff "../test/ref_stdout/${filename}.out" "../test/sample_stdout/${filename}.out" | head -n 2)
+    diff_output=$(diff "../test/ref_stdout/${filename}.out" "../test/sample_stdout/${filename}.out" | head -n 4)
     if [[ $diff_output ]]; then
         echo ""
         echo "================================================================================="
@@ -45,7 +45,7 @@ for q in ../sample/*.query ; do
     for f in *.tbl ; do
         mv -- "$f" "../test/sample_dump/${filename}_${f}"
         # diff dump file with reference dump file
-        diff_dump=$(diff "../test/ref_dump/${filename}_${f}" "../test/sample_dump/${filename}_${f}" | head -n 2)
+        diff_dump=$(diff "../test/ref_dump/${filename}_${f}" "../test/sample_dump/${filename}_${f}" | head -n 4)
         if [[ $diff_dump ]]; then
             echo ""
             echo "================================================================================="
