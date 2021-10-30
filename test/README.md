@@ -12,11 +12,22 @@
     - log stderr: `unit_test/unit.stderr`
 
 ### Usage
+#### Generate random 5x5 table and enter interaction mode
 ```bash
-    cd test
     ./unit.sh
 ```
 
+#### Read from argument
+- Read table from my path and enter interaction mode
+```bash
+    ./unit.sh unit.tbl
+```
+- Read query from my path (table must be specified) and directly output stdout and stderr
+```bash
+    ./unit.sh unit.tbl unit.query
+```
+
+#### Handle `permission denied`
 If `permission denied`, try following command to grant the script execution permission
 
 ```bash
@@ -24,9 +35,10 @@ If `permission denied`, try following command to grant the script execution perm
 ```
 
 ### sample output
+#### interaction mode
 ```log
 =================================================================================
-Testing unit:  query
+Unit test
 =================================================================================
 [Running] building lemondb...
 -- Configuring done
@@ -45,15 +57,44 @@ test 6
         r3      4       5       2       0       0
         r4      1       5       2       1       1
 
---------------------------------------------------------
+=================================================================================
 [Query] COUNT ( ) FROM test;
 ANSWER = 5
---------------------------------------------------------
+=================================================================================
 [Query] MAX ( c0 c1 ) FROM test WHERE ( c3 >= 2 );
 ANSWER = ( 5 1 )
---------------------------------------------------------
-[Query]
+=================================================================================
+[Query] q
+exit
+=================================================================================
 ```
+
+### direct output mode
+```log
+=================================================================================
+Unit test
+=================================================================================
+[Running] building lemondb...
+-- Configuring done
+-- Generating done
+-- Build files have been written to: ~/VE482_p2/build
+[100%] Built target lemondb
+[Success] done building lemondb
+=================================================================================
+[Running] Reading table from "unit.tbl"...
+[Running] Reading query from "unit.query"...
+=================================================================================
+[Log] stdout:
+1
+2
+Affected 5 rows.
+3
+=================================================================================
+[Log] stderr:
+lemondb: info: running in 1 threads
+=================================================================================
+```
+
 ## integration test
 
 ### setup
