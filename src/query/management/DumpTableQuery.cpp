@@ -21,7 +21,7 @@ QueryResult::Ptr DumpTableQuery::execute() {
     }
     outfile << db[this->targetTable];
     outfile.close();
-    return make_unique<SuccessMsgResult>(qname, targetTable);
+    return make_unique<NullQueryResult>();
   } catch (const exception &e) {
     return make_unique<ErrorMsgResult>(qname, e.what());
   }
