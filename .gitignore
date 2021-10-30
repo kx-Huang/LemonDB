@@ -98,7 +98,7 @@ cmake-build-release
 /test/ref_stdout/
 /test/sample_dump/
 /test/sample_stdout/
-/test/unit_test
+/test/unit_test*
 
 # tar
 *.zip
