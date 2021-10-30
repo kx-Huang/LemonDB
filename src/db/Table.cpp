@@ -64,18 +64,3 @@ std::ostream &operator<<(std::ostream &os, const Table &table) {
   }
   return os << buffer.str();
 }
-
-void Table::duplicate(std::vector<Table::Iterator> &rows)
-{
-  auto end = rows.end();
-  for (auto table_it(rows.begin()); table_it != end; ++table_it) {
-    KeyType key_copy = table_it->it->key + "_copy";
-    // std::cout << key_copy << std::endl;
-    while (this->keyMap.find(key_copy) != this->keyMap.end()){
-      key_copy = key_copy + "_copy";
-      // std::cout << "IN LOOP!";
-      // std::cout << key_copy << std::endl;
-    }
-    this->insertByIndex(key_copy, std::vector(table_it->it->datum));
-  }
-}

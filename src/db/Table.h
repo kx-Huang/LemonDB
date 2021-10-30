@@ -288,6 +288,18 @@ public:
   void insertByIndex(KeyType key, std::vector<ValueType> &&data);
 
   /**
+   * Duplicate a row of date by its key
+   * @return
+   */
+  void duplicateByIndex(KeyType key) {
+    auto data = ((*this)[key])->it->datum;
+    KeyType key_copy = ((*this)[key])->it->key + "_copy";
+    while (this->keyMap.find(key_copy) != this->keyMap.end())
+      key_copy.append("_copy");
+    this->insertByIndex(key_copy, std::move(data));
+  };
+
+  /**
    * Access the value according to the key
    * @param key
    * @return the Object that KEY = key, or nullptr if key doesn't exist
@@ -319,12 +331,6 @@ public:
   size_t size() const { return this->data.size(); }
 
   /**
-   * Duplicate rows that are in the vector rows
-   * @return
-   */ 
-  void duplicate(std::vector<Table::Iterator> &rows);
-
-  /**
    * Return the fields in the table
    * @return
    */
@@ -341,9 +347,9 @@ public:
     return result;
   }
 
-  void deleteRow(Iterator it, size_t offset){
+  void deleteRow(Iterator it, size_t offset) {
     keyMap.erase(it->key());
-    data.erase(data.begin()+(int)offset);
+    data.erase(data.begin() + (int)offset);
   }
 
   /**
