@@ -288,15 +288,17 @@ public:
   void insertByIndex(KeyType key, std::vector<ValueType> &&data);
 
   /**
-   * Duplicate a row of date by its key
+   * Duplicate a row of date by its
    * @return
    */
-  void duplicateByIndex(KeyType key) {
+  bool duplicateByIndex(KeyType key) {
     auto data = ((*this)[key])->it->datum;
     KeyType key_copy = ((*this)[key])->it->key + "_copy";
-    while (this->keyMap.find(key_copy) != this->keyMap.end())
-      key_copy.append("_copy");
-    this->insertByIndex(key_copy, std::move(data));
+    if (this->keyMap.find(key_copy) == this->keyMap.end()) {
+      this->insertByIndex(key_copy, std::move(data));
+      return true;
+    }
+    return false;
   };
 
   /**

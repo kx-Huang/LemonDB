@@ -20,14 +20,12 @@ QueryResult::Ptr DuplicateQuery::execute() {
       for (auto it = table->begin(); it != end; ++it) {
         if (this->evalCondition(*it)) {
           keys.push_back((*it).key());
-          ++counter;
         }
       }
     }
-    if (counter > 0) {
-      for (auto it = keys.begin(); it != keys.end(); it++)
-        table->duplicateByIndex((*it));
-    }
+    for (auto it = keys.begin(); it != keys.end(); it++)
+      if (table->duplicateByIndex((*it)))
+        counter++;
     return make_unique<RecordCountResult>(counter);
   } catch (const TableNameNotFound &e) {
     return make_unique<ErrorMsgResult>(qname, this->targetTable,
