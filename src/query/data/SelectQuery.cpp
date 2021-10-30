@@ -38,6 +38,8 @@ QueryResult::Ptr SelectQuery::execute() {
         if (this->evalCondition(*it) == true)
           priorityQueue.push(it);
       }
+      if (priorityQueue.size() == 0)
+        return make_unique<NullQueryResult>();
       while (priorityQueue.size() != 0) {
         auto top = priorityQueue.top();
         oss << "( ";
