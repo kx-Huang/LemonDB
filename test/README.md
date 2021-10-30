@@ -31,7 +31,7 @@ Testing unit:  query
 [Running] building lemondb...
 -- Configuring done
 -- Generating done
--- Build files have been written to: /Users/michaelhuang/Desktop/VE482_p2/build
+-- Build files have been written to: ~/VE482_p2/build
 [100%] Built target lemondb
 [Success] done building lemondb
 =================================================================================
@@ -39,18 +39,18 @@ Testing unit:  query
 
 test 6
         KEY     c0      c1      c2      c3      c4
-        r0      3       3       0       5       4
-        r1      5       2       0       2       5
-        r2      1       0       4       1       2
-        r3      4       5       3       2       0
-        r4      1       3       3       3       5
+        r0      2       2       4       1       2
+        r1      5       1       3       2       3
+        r2      1       0       3       3       1
+        r3      4       5       2       0       0
+        r4      1       5       2       1       1
 
 --------------------------------------------------------
 [Query] COUNT ( ) FROM test;
 ANSWER = 5
 --------------------------------------------------------
-[Query] MAX ( c0 c2 ) FROM test WHERE ( c3 > 1 );
-ANSWER = ( 5 3 )
+[Query] MAX ( c0 c1 ) FROM test WHERE ( c3 >= 2 );
+ANSWER = ( 5 1 )
 --------------------------------------------------------
 [Query]
 ```
