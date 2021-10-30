@@ -7,14 +7,16 @@
 # fi
 # path="unit_$1"
 
+table_name="test"
 path="unit_test"
 table="unit.tbl"
 query="unit.query"
 stdout="unit.stdout"
 stderr="unit.stderr"
+dump="unit.dump"
 
 # clean last test files
-# rm -rf $path
+rm -rf $path
 mkdir -p $path
 
 echo "================================================================================="
@@ -36,7 +38,7 @@ echo "==========================================================================
 MAX=5
 printf "[Running] generating sample table...\n\n"
 cd $path
-echo test $((MAX+1)) > $table
+echo $table_name $((MAX+1)) > $table
 ( printf "\tKEY\t"
     for i in `seq 0 $((MAX-1))`
     do
@@ -64,9 +66,10 @@ while [ $exit -ne 1 ]; do
     if [ "$cmd" == "q" ]; then
         exit
     fi
-    printf "LOAD %s;\n" $table > $query
+    printf "LOAD %s ;\n" $table > $query
     echo $cmd >> $query
+    echo "DUMP" $table_name $dump ";" >> $query
     ../../build/lemondb --listen $query --thread 1 2>$stderr 1>$stdout
-    awk 'NR >= 3' < $stdout
-    awk 'NR >= 3' < $stderr
+    awk 'NR == 3' < $stdout
+    # awk 'NR >= 3' < $stderr
 done
