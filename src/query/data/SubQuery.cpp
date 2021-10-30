@@ -20,11 +20,10 @@ QueryResult::Ptr SubQuery::execute() {
     if (result.second) {
       for (auto it = table.begin(); it != table.end(); ++it) {
         if (this->evalCondition(*it)) {
-          int total = (*it)[*this->operands.begin()];
-          for (auto key = this->operands.begin() + 1;
-               key != this->operands.end() - 1; key++) {
-            total -= (*it)[*key];
-          }
+          auto key = this->operands.begin();
+          int total = (*it)[*key++];
+          while (key != this->operands.end() - 1)
+            total -= (*it)[*key++];
           (*it)[*(this->operands.end() - 1)] = total;
           counter++;
         }
