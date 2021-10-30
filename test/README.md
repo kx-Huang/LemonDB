@@ -1,6 +1,62 @@
 # LemonDB Test Environment
 
-# setup
+## unit test
+
+### build, input and run your query
+
+- Build LemonDB to `build/lemondb`
+- Unit test files:
+    - generate sample random table: `unit_test/unit.tbl`
+    - store input query: `unit_test/unit.tbl`
+    - log stdout: `unit_test/unit.stdout`
+    - log stderr: `unit_test/unit.stderr`
+
+### Usage
+```bash
+    cd test
+    ./unit.sh
+```
+
+If `permission denied`, try following command to grant the script execution permission
+
+```bash
+    chmod +x ./unit.sh
+```
+
+### sample output
+```log
+=================================================================================
+Testing unit:  query
+=================================================================================
+[Running] building lemondb...
+-- Configuring done
+-- Generating done
+-- Build files have been written to: /Users/michaelhuang/Desktop/VE482_p2/build
+[100%] Built target lemondb
+[Success] done building lemondb
+=================================================================================
+[Running] generating sample table...
+
+test 6
+        KEY     c0      c1      c2      c3      c4
+        r0      3       3       0       5       4
+        r1      5       2       0       2       5
+        r2      1       0       4       1       2
+        r3      4       5       3       2       0
+        r4      1       3       3       3       5
+
+--------------------------------------------------------
+[Query] COUNT ( ) FROM test;
+ANSWER = 5
+--------------------------------------------------------
+[Query] MAX ( c0 c2 ) FROM test WHERE ( c3 > 1 );
+ANSWER = ( 5 3 )
+--------------------------------------------------------
+[Query]
+```
+## integration test
+
+### setup
 
 - copy from remote server `/opt/lemondb/sample_dump` to local `test/ref_dump`
 - copy from remote server `/opt/lemondb/sample_stdout` to local `test/ref_stdout`
@@ -11,19 +67,26 @@
     scp -r Remote:/opt/lemondb/sample_stdout ref_stdout
 ```
 
-# build, run, benchmark and diff
+### build, run, benchmark and diff
 
 - Build LemonDB to `build/lemondb`
 - Save output files to `test/sample_dump` and `test/sample_stdout`
 - Diff with `test/ref_dump` and `test/ref_stdout`
 - Record runtime
 
+### Usage
 ```bash
     cd test
-    ./tester.sh
+    ./integration.sh
 ```
 
-# sample output
+If `permission denied`, try following command to grant the script execution permission
+
+```bash
+    chmod +x ./integration.sh
+```
+
+### sample output
 
 ```log
 =================================================================================
@@ -31,7 +94,7 @@
 =================================================================================
 -- Configuring done
 -- Generating done
--- Build files have been written to: /Users/michaelhuang/Desktop/VE482_p2/build
+-- Build files have been written to: ~/VE482_p2/build
 [100%] Built target lemondb
 =================================================================================
  Running lemondb...
