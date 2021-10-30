@@ -27,7 +27,7 @@ QueryResult::Ptr InsertQuery::execute() {
       data.emplace_back(strtol(it->c_str(), nullptr, 10));
     }
     table.insertByIndex(key, move(data));
-    return std::make_unique<SuccessMsgResult>(qname, targetTable);
+    return std::make_unique<NullQueryResult>();
   } catch (const TableNameNotFound &e) {
     return make_unique<ErrorMsgResult>(qname, this->targetTable,
                                        "No such table."s);

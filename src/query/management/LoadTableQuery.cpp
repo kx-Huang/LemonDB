@@ -21,7 +21,7 @@ QueryResult::Ptr LoadTableQuery::execute() {
     }
     db.loadTableFromStream(infile, this->fileName);
     infile.close();
-    return make_unique<SuccessMsgResult>(qname, targetTable);
+    return make_unique<NullQueryResult>();
   } catch (const exception &e) {
     return make_unique<ErrorMsgResult>(qname, e.what());
   }

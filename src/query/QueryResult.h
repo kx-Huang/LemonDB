@@ -75,14 +75,14 @@ class SuccessMsgResult : public SucceededQueryResult {
   std::string msg;
 
 public:
-  bool display() override { return false; }
+  bool display() override { return true; }
 
   explicit SuccessMsgResult (const std::string &msg) {
     this->msg = msg;
   }
 
   explicit SuccessMsgResult(const int number) {
-    this->msg = R"(ANSWER = "?".)"_f % number;
+    this->msg = R"(ANSWER = ?)"_f % number;
   }
 
   explicit SuccessMsgResult(int *int_arr, size_t size) {
@@ -91,7 +91,7 @@ public:
     for (size_t i (0); i < size; i++) {
       ss << int_arr[i] << " ";
     }
-    ss << ")";
+    ss << ") ";
     this->msg = ss.str();
     delete[] int_arr;
   }
@@ -102,7 +102,7 @@ public:
     for (auto result : results) {
       ss << result << " ";
     }
-    ss << ")";
+    ss << ") ";
     this->msg = ss.str();
   }
 
