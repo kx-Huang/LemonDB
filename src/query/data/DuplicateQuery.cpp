@@ -17,15 +17,15 @@ QueryResult::Ptr DuplicateQuery::execute() {
     Table::SizeType counter(0);
     if (result.second) {
       auto end = table->end();
-      for (auto it = table->begin(); it != end; ++it) {
-        if (this->evalCondition(*it)) {
+      for (auto it = table->begin(); it != end; it++) {
+        if (this->evalCondition(*it) && table->evalDuplicate((*it).key())) {
           keys.push_back((*it).key());
+          counter++;
         }
       }
     }
     for (auto it = keys.begin(); it != keys.end(); it++)
-      if (table->duplicateByIndex((*it)))
-        counter++;
+      table->duplicateByKey(*it);
     return make_unique<RecordCountResult>(counter);
   } catch (const TableNameNotFound &e) {
     return make_unique<ErrorMsgResult>(qname, this->targetTable,

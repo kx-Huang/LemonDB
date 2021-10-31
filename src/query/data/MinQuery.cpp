@@ -12,21 +12,27 @@ QueryResult::Ptr MinQuery::execute() {
   Database &db = Database::getInstance();
   // start of try
   try {
+    bool found = false;
     auto &table = db[this->targetTable];
     auto result = initCondition(table);
     int *int_arr = new int[(this->operands).size()];
-    for (size_t i (0); i < this->operands.size(); i++) int_arr[i] = INT32_MAX;
+    for (size_t i(0); i < this->operands.size(); i++)
+      int_arr[i] = INT32_MAX;
     if (result.second) {
       for (auto row = table.begin(); row != table.end(); ++row) {
         if (this->evalCondition(*row)) {
-          for (size_t i (0); i < this->operands.size(); i++) {
+          found = true;
+          for (size_t i(0); i < this->operands.size(); i++) {
             if (int_arr[i] > (*row)[this->operands[i]])
               int_arr[i] = (*row)[this->operands[i]];
           }
         }
       }
     }
-    return make_unique<SuccessMsgResult>(int_arr, this->operands.size());
+    if (found)
+      return make_unique<SuccessMsgResult>(int_arr, this->operands.size());
+    else
+      return make_unique<NullQueryResult>();
   } catch (const TableNameNotFound &e) {
     return make_unique<ErrorMsgResult>(qname, this->targetTable,
                                        "No such table."s);

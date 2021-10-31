@@ -22,7 +22,7 @@ Table::getFieldIndex(const Table::FieldNameType &field) const {
   }
 }
 
-void Table::insertByIndex(KeyType key, std::vector<ValueType> &&data) {
+void Table::insertByKey(KeyType key, std::vector<ValueType> &&data) {
   if (this->keyMap.find(key) != this->keyMap.end()) {
     std::string err = "In Table \"" + this->tableName + "\" : Key \"" + key +
                       "\" already exists!";

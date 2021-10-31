@@ -169,7 +169,7 @@ Table &Database::loadTableFromStream(std::istream &is, std::string source) {
                                       std::to_string(lineCount));
       tuple.emplace_back(value);
     }
-    table->insertByIndex(key, std::move(tuple));
+    table->insertByKey(key, std::move(tuple));
   }
 
   return db.registerTable(std::move(table));

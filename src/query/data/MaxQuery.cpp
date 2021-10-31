@@ -32,7 +32,7 @@ QueryResult::Ptr MaxQuery::execute() {
     }
     if (found)
       return make_unique<SuccessMsgResult>(int_arr, this->operands.size());
-      else
+    else
       return make_unique<NullQueryResult>();
   } catch (const TableNameNotFound &e) {
     return make_unique<ErrorMsgResult>(qname, this->targetTable,

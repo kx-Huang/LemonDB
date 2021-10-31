@@ -285,20 +285,45 @@ public:
    * @param key
    * @param data
    */
-  void insertByIndex(KeyType key, std::vector<ValueType> &&data);
+  void insertByKey(KeyType key, std::vector<ValueType> &&data);
 
   /**
-   * Duplicate a row of date by its
+   * Delete a row of data by its key
+   * @param key
+   */
+  void deleteByKey(KeyType key) {
+    this->data.erase(((*this)[key])->it);
+    this->keyMap.erase(key);
+  }
+
+  /**
+   * Forward a row of data by offset
+   * @param key
+   * @param offset
+   */
+  void forwardByOffset(KeyType key, Table::SizeType offset) {
+    this->keyMap[key] -= offset;
+  }
+
+  /**
+   * Evaluate duplicate key
    * @return
    */
-  bool duplicateByIndex(KeyType key) {
-    auto data = ((*this)[key])->it->datum;
-    KeyType key_copy = ((*this)[key])->it->key + "_copy";
-    if (this->keyMap.find(key_copy) == this->keyMap.end()) {
-      this->insertByIndex(key_copy, std::move(data));
+  bool evalDuplicate(KeyType key) {
+    key.append("_copy");
+    if (this->keyMap.find(key) == this->keyMap.end())
       return true;
-    }
     return false;
+  }
+
+  /**
+   * Duplicate a row of data by its key
+   * @return
+   */
+  void duplicateByKey(KeyType key) {
+    auto data = ((*this)[key])->it->datum;
+    key.append("_copy");
+    this->insertByKey(key, std::move(data));
   };
 
   /**
@@ -347,11 +372,6 @@ public:
     data.clear();
     keyMap.clear();
     return result;
-  }
-
-  void deleteRow(Iterator it, size_t offset) {
-    keyMap.erase(it->key());
-    data.erase(data.begin() + (int)offset);
   }
 
   /**
