@@ -99,6 +99,7 @@ cmake-build-release
 /test/sample_dump/
 /test/sample_stdout/
 /test/unit_test*
+/single_sample
 
 # tar
 *.zip
