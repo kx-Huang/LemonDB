@@ -14,8 +14,8 @@ public:
   using ComplexQuery::ComplexQuery;
 
   QueryResult::Ptr execute() override;
-  
+
   std::string toString() override;
 };
 
-#endif //PROJECT_DELECTQUERY_H
+#endif // PROJECT_DELECTQUERY_H

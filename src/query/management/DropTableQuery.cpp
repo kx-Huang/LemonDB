@@ -13,7 +13,7 @@ QueryResult::Ptr DropTableQuery::execute() {
   Database &db = Database::getInstance();
   try {
     db.dropTable(this->targetTable);
-    return make_unique<SuccessMsgResult>(qname);
+    return make_unique<NullQueryResult>();
   } catch (const TableNameNotFound &e) {
     return make_unique<ErrorMsgResult>(qname, targetTable, "No such table."s);
   } catch (const exception &e) {

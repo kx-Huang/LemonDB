@@ -8,24 +8,26 @@
 #include <iostream>
 
 #include "../db/Database.h"
-#include "data/InsertQuery.h"
-#include "data/UpdateQuery.h"
-#include "data/DeleteQuery.h"
-#include "data/SwapQuery.h"
-#include "data/SelectQuery.h"
-#include "data/SumQuery.h"
-#include "data/CountQuery.h"
-#include "data/MinQuery.h"
-#include "data/MaxQuery.h"
-#include "data/DuplicateQuery.h"
 #include "data/AddQuery.h"
+#include "data/CountQuery.h"
+#include "data/DeleteQuery.h"
+#include "data/DuplicateQuery.h"
+#include "data/InsertQuery.h"
+#include "data/MaxQuery.h"
+#include "data/MinQuery.h"
+#include "data/SelectQuery.h"
 #include "data/SubQuery.h"
+#include "data/SumQuery.h"
+#include "data/SwapQuery.h"
+#include "data/UpdateQuery.h"
+#include "management/CopyTableQuery.h"
 #include "management/DropTableQuery.h"
 #include "management/DumpTableQuery.h"
 #include "management/ListTableQuery.h"
 #include "management/LoadTableQuery.h"
 #include "management/PrintTableQuery.h"
 #include "management/QuitQuery.h"
+#include "management/TruncateTableQuery.h"
 
 // Prints out debugging information.
 // Does no real work
@@ -55,8 +57,7 @@ ManageTableQueryBuilder::tryExtractQuery(TokenizedQueryString &query) {
     if (query.token.front() == "DROP")
       return std::make_unique<DropTableQuery>(query.token[1]);
     if (query.token.front() == "TRUNCATE")
-      return std::make_unique<NopQuery>(); // Not implemented
-    // return std::make_unique<TruncateTableQuery>(query.token[1]);
+      return std::make_unique<TruncateTableQuery>(query.token[1]);
   }
   if (query.token.size() == 3) {
     if (query.token.front() == "DUMP") {
@@ -65,8 +66,7 @@ ManageTableQueryBuilder::tryExtractQuery(TokenizedQueryString &query) {
       return std::make_unique<DumpTableQuery>(query.token[1], query.token[2]);
     }
     if (query.token.front() == "COPYTABLE")
-      return std::make_unique<NopQuery>(); // Not implemented
-    // return std::make_unique<CopyTableQuery>(query.token[1], query.token[2]);
+      return std::make_unique<CopyTableQuery>(query.token[1], query.token[2]);
   }
   return this->nextBuilder->tryExtractQuery(query);
 }
@@ -158,42 +158,43 @@ Query::Ptr ComplexQueryBuilder::tryExtractQuery(TokenizedQueryString &query) {
                                          this->conditionToken);
   if (operation == "SELECT")
     // return std::make_unique<NopQuery>(); // Not implemented
-  return std::make_unique<SelectQuery>(
-          this->targetTable, this->operandToken, this->conditionToken);
+    return std::make_unique<SelectQuery>(this->targetTable, this->operandToken,
+                                         this->conditionToken);
   if (operation == "DELETE")
-    return std::make_unique<DeleteQuery>(
-          this->targetTable, this->operandToken, this->conditionToken);
+    return std::make_unique<DeleteQuery>(this->targetTable, this->operandToken,
+                                         this->conditionToken);
   if (operation == "DUPLICATE")
     // return std::make_unique<NopQuery>(); // Not implemented
-  return std::make_unique<DuplicateQuery>(
-          this->targetTable, this->operandToken, this->conditionToken);
+    return std::make_unique<DuplicateQuery>(
+        this->targetTable, this->operandToken, this->conditionToken);
   if (operation == "COUNT")
     // return std::make_unique<NopQuery>(); // Not implemented
-    return std::make_unique<CountQuery>(
-            this->targetTable, this->operandToken, this->conditionToken);
+    return std::make_unique<CountQuery>(this->targetTable, this->operandToken,
+                                        this->conditionToken);
   if (operation == "SUM")
     // return std::make_unique<NopQuery>(); // Not implemented
-    return std::make_unique<SumQuery>(
-            this->targetTable, this->operandToken, this->conditionToken);
+    return std::make_unique<SumQuery>(this->targetTable, this->operandToken,
+                                      this->conditionToken);
   if (operation == "MIN")
     // return std::make_unique<NopQuery>(); // Not implemented
-    return std::make_unique<MinQuery>(
-            this->targetTable, this->operandToken, this->conditionToken);
+    return std::make_unique<MinQuery>(this->targetTable, this->operandToken,
+                                      this->conditionToken);
   if (operation == "MAX")
     // return std::make_unique<NopQuery>(); // Not implemented
-    return std::make_unique<MaxQuery>(
-            this->targetTable, this->operandToken, this->conditionToken);
+    return std::make_unique<MaxQuery>(this->targetTable, this->operandToken,
+                                      this->conditionToken);
   if (operation == "ADD")
     // return std::make_unique<NopQuery>(); // Not implemented
-    return std::make_unique<AddQuery>(
-            this->targetTable, this->operandToken, this->conditionToken);
+    return std::make_unique<AddQuery>(this->targetTable, this->operandToken,
+                                      this->conditionToken);
   if (operation == "SUB")
     // return std::make_unique<NopQuery>(); // Not implemented
-    return std::make_unique<SubQuery>(
-      this->targetTable, this->operandToken, this->conditionToken);
+    return std::make_unique<SubQuery>(this->targetTable, this->operandToken,
+                                      this->conditionToken);
   if (operation == "SWAP")
     // return std::make_unique<NopQuery>(); // Not implemented
-    return std::make_unique<SwapQuery>(this->targetTable, this->operandToken, this->conditionToken);
+    return std::make_unique<SwapQuery>(this->targetTable, this->operandToken,
+                                       this->conditionToken);
   std::cerr << "Complicated query found!" << std::endl;
   std::cerr << "Operation = " << query.token.front() << std::endl;
   std::cerr << "    Operands : ";

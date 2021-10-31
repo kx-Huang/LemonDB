@@ -53,5 +53,5 @@ QueryResult::Ptr DeleteQuery::execute() {
 }
 
 std::string DeleteQuery::toString() {
-  return "QUERY = DELETE QUERY IN" + this->targetTable + "\"";
+  return "QUERY = DELETE in" + this->targetTable + "\"";
 }

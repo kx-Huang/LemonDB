@@ -43,5 +43,5 @@ QueryResult::Ptr DuplicateQuery::execute() {
 }
 
 std::string DuplicateQuery::toString() {
-  return "QUERY = Duplicate " + this->targetTable + "\"";
+  return "QUERY = DUPLICATE " + this->targetTable + "\"";
 }

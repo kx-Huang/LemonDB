@@ -37,5 +37,5 @@ QueryResult::Ptr CountQuery::execute() {
 }
 
 std::string CountQuery::toString() {
-  return "QUERY = Count " + this->targetTable + "\"";
+  return "QUERY = COUNT " + this->targetTable + "\"";
 }

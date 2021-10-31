@@ -44,5 +44,5 @@ QueryResult::Ptr SwapQuery::execute() {
 }
 
 std::string SwapQuery::toString() {
-  return "Query = Swap " + this->targetTable + "\"";
+  return "Query = SWAP " + this->targetTable + "\"";
 }
