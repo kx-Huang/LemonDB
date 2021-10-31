@@ -1,5 +1,11 @@
 #!/bin/bash
 
+if [ "$#" -ge 1 ]; then
+    path="$1"
+else
+    path="sample"
+fi
+
 # clean last test files
 rm -rf sample_dump sample_stdout
 
@@ -20,12 +26,12 @@ mkdir -p sample_dump
 mkdir -p sample_stdout
 shopt -s nullglob
 TIMEFORMAT=%R
-cd ../sample
+cd ../$path
 printf "[Running] testing lemondb...\n\n"
 printf "  %-20s   %-10s  \n" "query name" time
 printf " ----------------------------------- \n"
 total_time=0
-for q in ../sample/*.query ; do
+for q in ../$path/*.query ; do
     filename=$(basename "$q" | cut -d. -f1)
     real_time=$( { time ../build/lemondb --listen $q 1>"../test/sample_stdout/${filename}.out" 2>/dev/null; } 2>&1 )
     total_time=$(echo $total_time+$real_time | bc)
