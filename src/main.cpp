@@ -8,6 +8,7 @@
 #include <iostream>
 #include <string>
 
+#include "multithreads/MultiThread.h"
 #include "query/QueryBuilders.h"
 #include "query/QueryParser.h"
 
@@ -54,6 +55,7 @@ int main(int argc, char *argv[]) {
 
   parseArgs(argc, argv);
 
+
   std::fstream fin;
   if (!parsedArgs.listen.empty()) {
     fin.open(parsedArgs.listen);
@@ -89,11 +91,15 @@ int main(int argc, char *argv[]) {
     exit(-1);
   } else if (parsedArgs.threads == 0) {
     // @TODO Auto detect the thread num
+    ThreadNum_Detection();
     std::cerr << "lemondb: info: auto detect thread num" << std::endl;
   } else {
+    set_ThreadNum((unsigned int)parsedArgs.threads);
     std::cerr << "lemondb: info: running in " << parsedArgs.threads
               << " threads" << std::endl;
   }
+ 
+  
 
   QueryParser p;
 
