@@ -46,7 +46,7 @@ fi
 
 # generate sample table
 if [ $read_my_table -eq 0 ]; then
-    MAX=5
+    MAX=16
     printf "[Running] generating sample table...\n"
     echo $table_name $((MAX+1)) > $table
     ( printf "\tKEY\t"
@@ -87,12 +87,12 @@ if [ $read_my_query -eq 0 ]; then
         printf "LOAD %s ;\n" $table > $query
         echo $cmd >> $query
         echo "DUMP" $table_name $dump ";" >> $query
-        ../../build/lemondb --listen $query --thread 1 2>$stderr 1>$stdout
+        ../../build/lemondb --listen $query --thread 8 2>$stderr 1>$stdout
         awk 'NR == 3' < $stdout
         # awk 'NR >= 3' < $stderr
     done
 else
-    ../../build/lemondb --listen $query --thread 1 2>$stderr 1>$stdout
+    ../../build/lemondb --listen $query --thread 8 2>$stderr 1>$stdout
     echo "================================================================================="
     echo "[Log] stderr:"
     grep -v "^$" $stderr
