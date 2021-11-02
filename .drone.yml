@@ -1,0 +1,22 @@
+kind: pipeline
+type: ssh
+name: default
+server:
+  host:
+    from_secret: host
+  user:
+    from_secret: username
+  ssh_key:
+    from_secret: ssh_key
+steps:
+  - name: prepare
+    commands:
+      - mkdir sample
+      - ln -s /opt/lemondb/sample/test.query sample/
+      - ln -s /opt/lemondb/db/ .
+      - ln -s /opt/lemondb/sample_stdout/ test/ref_stdout
+      - ln -s /opt/lemondb/sample_dump/ test/ref_dump
+  - name: build, run and diff
+    commands:
+      - cd test
+      - bash integration.sh
