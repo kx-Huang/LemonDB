@@ -13,7 +13,6 @@ unsigned int get_ThreadNum(){
 
 void set_ThreadNum(unsigned int temp){
 	thread_num = temp;
-	return;
 }
 
 
