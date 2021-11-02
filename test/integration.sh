@@ -43,7 +43,7 @@ for q in ../$path/*.query ; do
         echo "[Error] output doesn't match in " "\"sample_stdout/${filename}.out\""
         echo "[Log]" "${diff_output}"
         echo "================================================================================="
-        exit
+        exit 1
         # else
         #     echo "[Success] output matches" "sample_dump/${filename}_${f}"
     fi
@@ -57,7 +57,7 @@ for q in ../$path/*.query ; do
             echo "[Error] output doesn't match for" "\"sample_dump/${filename}_${f}\""
             echo "[Log]" "${diff_dump}"
             echo "================================================================================="
-            exit
+            exit 1
             # else
             #     echo "[Success] output matches" "sample_dump/${filename}_${f}"
         fi

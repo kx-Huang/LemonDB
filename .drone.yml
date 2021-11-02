@@ -11,7 +11,8 @@ server:
 steps:
   - name: prepare
     commands:
-      - ln -s /opt/lemondb/sample .
+      - mkdir sample
+      - ln -s /opt/lemondb/sample/test.query sample/
       - ln -s /opt/lemondb/db/ .
       - ln -s /opt/lemondb/sample_stdout/ test/ref_stdout
       - ln -s /opt/lemondb/sample_dump/ test/ref_dump
