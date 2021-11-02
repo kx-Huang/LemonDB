@@ -16,7 +16,7 @@ cd ..
 mkdir -p build
 cd build
 cmake -DCMAKE_C_COMPILER=/usr/bin/clang -DCMAKE_CXX_COMPILER=/usr/bin/clang++ ../src
-cmake --build .
+cmake --build . -- -j64
 cd ../test
 printf "[Success] done building lemondb\n"
 echo "================================================================================="
@@ -26,14 +26,13 @@ mkdir -p sample_dump
 mkdir -p sample_stdout
 shopt -s nullglob
 TIMEFORMAT=%R
-cd ../$path
 printf "[Running] testing lemondb...\n\n"
 printf "  %-20s   %-10s  \n" "query name" time
 printf " ----------------------------------- \n"
 total_time=0
 for q in ../$path/*.query ; do
     filename=$(basename "$q" | cut -d. -f1)
-    real_time=$( { time ../build/lemondb --listen $q 1>"../test/sample_stdout/${filename}.out" 2>/dev/null; } 2>&1 )
+    real_time=$( { time ../build/lemondb <$q 1>"../test/sample_stdout/${filename}.out" 2>/dev/null; } 2>&1 )
     total_time=$(echo $total_time+$real_time | bc)
     printf "  %-20s   %-10s  \n" $filename $real_time
     # diff output with reference output file
@@ -44,7 +43,7 @@ for q in ../$path/*.query ; do
         echo "[Error] output doesn't match in " "\"sample_stdout/${filename}.out\""
         echo "[Log]" "${diff_output}"
         echo "================================================================================="
-        exit
+        exit 1
         # else
         #     echo "[Success] output matches" "sample_dump/${filename}_${f}"
     fi
@@ -58,7 +57,7 @@ for q in ../$path/*.query ; do
             echo "[Error] output doesn't match for" "\"sample_dump/${filename}_${f}\""
             echo "[Log]" "${diff_dump}"
             echo "================================================================================="
-            exit
+            exit 1
             # else
             #     echo "[Success] output matches" "sample_dump/${filename}_${f}"
         fi
