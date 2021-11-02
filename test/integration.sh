@@ -26,14 +26,13 @@ mkdir -p sample_dump
 mkdir -p sample_stdout
 shopt -s nullglob
 TIMEFORMAT=%R
-cd ../$path
 printf "[Running] testing lemondb...\n\n"
 printf "  %-20s   %-10s  \n" "query name" time
 printf " ----------------------------------- \n"
 total_time=0
 for q in ../$path/*.query ; do
     filename=$(basename "$q" | cut -d. -f1)
-    real_time=$( { time ../build/lemondb --listen $q 1>"../test/sample_stdout/${filename}.out" 2>/dev/null; } 2>&1 )
+    real_time=$( { time ../build/lemondb <$q 1>"../test/sample_stdout/${filename}.out" 2>/dev/null; } 2>&1 )
     total_time=$(echo $total_time+$real_time | bc)
     printf "  %-20s   %-10s  \n" $filename $real_time
     # diff output with reference output file
