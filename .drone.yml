@@ -9,11 +9,13 @@ server:
   ssh_key:
     from_secret: ssh_key
 steps:
-- name: greeting
-  commands:
-  - echo hello world
-  - whoami
-  - pwd
-  - ls -lha
-  - tree -lha .
-  - clang --version
+  - name: prepare
+    commands:
+      - ln -s /opt/lemondb/sample .
+      - ln -s /opt/lemondb/db/ .
+      - ln -s /opt/lemondb/sample_stdout/ test/ref_stdout
+      - ln -s /opt/lemondb/sample_dump/ test/ref_dump
+  - name: build, run and diff
+    commands:
+      - cd test
+      - bash integration.sh
