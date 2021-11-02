@@ -77,7 +77,6 @@ QueryResult::Ptr SubQuery::execute() {
             counter++;
           }
         }
-        return make_unique<RecordCountResult>(counter);
       }
     } else {
       copy_table = &table;
@@ -93,10 +92,8 @@ QueryResult::Ptr SubQuery::execute() {
         pthread_join(*(store + i), NULL);
       }
       delete[] store;
-      return make_unique<RecordCountResult>(counter);
     }
-    return make_unique<ErrorMsgResult>(qname, this->targetTable.c_str(),
-                                       "Holy Shit!");
+    return make_unique<RecordCountResult>(counter);
   } catch (const TableNameNotFound &e) {
     return make_unique<ErrorMsgResult>(qname, this->targetTable,
                                        "No such table."s);
