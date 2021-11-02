@@ -32,14 +32,17 @@ QueryResult::Ptr SwapQuery::execute() {
     }
     return make_unique<RecordCountResult>(counter);
   } catch (const TableNameNotFound &e) {
-        return make_unique<ErrorMsgResult>(qname, this->targetTable, "No such table."s);
+    return make_unique<ErrorMsgResult>(qname, this->targetTable,
+                                       "No such table."s);
   } catch (const IllFormedQueryCondition &e) {
-      return make_unique<ErrorMsgResult>(qname, this->targetTable, e.what());
+    return make_unique<ErrorMsgResult>(qname, this->targetTable, e.what());
   } catch (const invalid_argument &e) {
-      // Cannot convert operand to string
-      return make_unique<ErrorMsgResult>(qname, this->targetTable, "Unknown error '?'"_f % e.what());
+    // Cannot convert operand to string
+    return make_unique<ErrorMsgResult>(qname, this->targetTable,
+                                       "Unknown error '?'"_f % e.what());
   } catch (const exception &e) {
-      return make_unique<ErrorMsgResult>(qname, this->targetTable, "Unkonwn error '?'."_f % e.what());
+    return make_unique<ErrorMsgResult>(qname, this->targetTable,
+                                       "Unkonwn error '?'."_f % e.what());
   }
 }
 

@@ -55,7 +55,6 @@ int main(int argc, char *argv[]) {
 
   parseArgs(argc, argv);
 
-
   std::fstream fin;
   if (!parsedArgs.listen.empty()) {
     fin.open(parsedArgs.listen);
@@ -98,8 +97,6 @@ int main(int argc, char *argv[]) {
     std::cerr << "lemondb: info: running in " << parsedArgs.threads
               << " threads" << std::endl;
   }
- 
-  
 
   QueryParser p;
 

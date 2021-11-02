@@ -5,7 +5,7 @@ constexpr const char *CountQuery::qname;
 
 QueryResult::Ptr CountQuery::execute() {
   using namespace std;
-    if (this->operands.size() > 0)
+  if (this->operands.size() > 0)
     return make_unique<ErrorMsgResult>(
         qname, this->targetTable.c_str(),
         "Invalid number of operands (? operands)."_f % operands.size());

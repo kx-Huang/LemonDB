@@ -24,12 +24,13 @@ Table::getFieldIndex(const Table::FieldNameType &field) const {
 
 void Table::insertByKey(KeyType key, std::vector<ValueType> &&data) {
   if (this->keyMap.find(key) != this->keyMap.end()) {
+    // key already exists
     std::string err = "In Table \"" + this->tableName + "\" : Key \"" + key +
                       "\" already exists!";
     throw ConflictingKey(err);
   }
-  this->keyMap.emplace(key, this->data.size());
-  this->data.emplace_back(std::move(key), data);
+  this->keyMap.emplace(key, this->data.size()); // add (key, data) to keymap
+  this->data.emplace_back(std::move(key), data); // use std::move to avoid unnecessary copy by vector.emplace_back()
 }
 
 Table::Object::Ptr Table::operator[](const Table::KeyType &key) {
