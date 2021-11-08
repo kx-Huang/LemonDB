@@ -1,12 +1,11 @@
 #ifndef SAFEQUEUE_H
 #define SAFEQUEUE_H
 
-#include <queue>
-#include <mutex>
 #include <condition_variable>
+#include <mutex>
+#include <queue>
 
-template<typename T>
-class SafeQueue {
+template <typename T> class SafeQueue {
 private:
   // only one thread can access queue_data at a time
   mutable std::mutex mut;
@@ -15,7 +14,7 @@ private:
 
 public:
   SafeQueue() {}
-  
+
   void push(T val) {
     // tries to obtain the lock
     // ensures mutex never locked forever
@@ -26,27 +25,28 @@ public:
   }
 
   /**
-   * @brief waits until queue is non-empty, 
+   * @brief waits until queue is non-empty,
    *        then pops
-   * @param value 
+   * @param value
    */
   void wait_and_pop(T &value) {
     // unique lock allows for the transfer
     // of ownership of lock
     std::unique_lock<std::mutex> lock(mut);
-    data_cond.wait(lock, [this]{return !queue_data.empty();});
+    queue_cond.wait(lock, [this] { return !queue_data.empty(); });
     value = std::move(queue_data.front());
     queue_data.pop();
   }
-  
+
   /**
    * @brief tries to pop()
    *        returns true on succeed, moves poped value to value
-   * @param value 
+   * @param value
    */
   bool try_pop(T &value) {
     std::lock_guard<std::mutex> lock(mut);
-    if (queue_data.empty()) return false;
+    if (queue_data.empty())
+      return false;
     value = std::move(queue_data.front());
     queue_data.pop();
   }
@@ -56,7 +56,5 @@ public:
     return queue_data.empty();
   }
 };
-
-
 
 #endif // PROJECT_SAFEQUEUE_H
