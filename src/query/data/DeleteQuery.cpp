@@ -4,6 +4,8 @@
 
 #include "DeleteQuery.h"
 #include "../../db/Database.h"
+#include <iostream>
+using namespace std;
 
 constexpr const char *DeleteQuery::qname;
 
@@ -16,26 +18,24 @@ QueryResult::Ptr DeleteQuery::execute() {
   Database &db = Database::getInstance();
   Table::SizeType counter(0); // number of affected rows;
   try {
-    // std::cout << "here!\n";
     auto table = &db[this->targetTable];
     if (this->condition.empty())
       return make_unique<RecordCountResult>(counter);
     auto result = initCondition(*table);
-    vector<Table::KeyType> keys;
     if (result.second) {
       for (auto it = table->begin(); it != table->end(); it++) {
+        auto key = it->key();
         if (this->evalCondition(*it)) {
-          keys.push_back((*it).key());
-          table->forwardByOffset((*it).key(), counter);
+          table->deleteKeyMap(key);
           counter++;
         } else {
+          table->moveDatum(it);
           if (counter != 0)
-            table->forwardByOffset((*it).key(), counter);
+            table->forwardKeyMap(key, counter);
         }
       }
     }
-    for (auto it = keys.begin(); it != keys.end(); it++)
-      table->deleteByKey(*it);
+    table->swapTable();
     return make_unique<RecordCountResult>(counter);
   } catch (const TableNameNotFound &e) {
     return make_unique<ErrorMsgResult>(qname, this->targetTable,

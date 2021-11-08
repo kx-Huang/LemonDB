@@ -86,6 +86,8 @@ private:
 
   /** The rows are saved in a vector, which is unsorted */
   std::vector<Datum> data;
+  std::vector<Datum> dataAfterDelete;
+
   /** Used to keep the keys unique and provide O(1) access with key */
   std::unordered_map<KeyType, SizeType> keyMap;
 
@@ -288,21 +290,35 @@ public:
   void insertByKey(KeyType key, std::vector<ValueType> &&data);
 
   /**
-   * Delete a row of data by its key
+   * Move datum that won't be deleted to dataAfterDelete
+   * @param it
+   */
+  void moveDatum(Iterator it) {
+    auto data = it.it->datum;
+    dataAfterDelete.emplace_back(it->key(), std::move(data));
+  }
+
+  /**
+   * Swap data and dataAfterDelete
+   */
+  void swapTable() {
+    data.clear();
+    std::swap(data, dataAfterDelete);
+  }
+
+  /**
+   * Delete keyMap by its key
    * @param key
    */
-  void deleteByKey(KeyType key) {
-    this->data.erase(((*this)[key])->it);
-    this->keyMap.erase(key);
-  }
+  void deleteKeyMap(KeyType key) { keyMap.erase(key); }
 
   /**
    * Forward a row of data by offset
    * @param key
    * @param offset
    */
-  void forwardByOffset(KeyType key, Table::SizeType offset) {
-    this->keyMap[key] -= offset;
+  void forwardKeyMap(KeyType key, Table::SizeType offset) {
+    keyMap[key] -= offset;
   }
 
   /**

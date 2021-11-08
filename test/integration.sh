@@ -15,7 +15,7 @@ printf "[Running] building lemondb...\n"
 cd ..
 mkdir -p build
 cd build
-cmake -DCMAKE_C_COMPILER=/usr/bin/clang -DCMAKE_CXX_COMPILER=/usr/bin/clang++ ../src
+cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_C_COMPILER=/usr/bin/clang -DCMAKE_CXX_COMPILER=/usr/bin/clang++ ../src
 cmake --build . -- -j64
 cd ../test
 printf "[Success] done building lemondb\n"
@@ -32,7 +32,7 @@ printf " ----------------------------------- \n"
 total_time=0
 for q in ../$path/*.query ; do
     filename=$(basename "$q" | cut -d. -f1)
-    real_time=$( { time ../build/lemondb <$q 1>"../test/sample_stdout/${filename}.out" 2>/dev/null; } 2>&1 )
+    real_time=$( { time ../build/lemondb --listen $q 1>"../test/sample_stdout/${filename}.out" 2>/dev/null; } 2>&1 )
     total_time=$(echo $total_time+$real_time | bc)
     printf "  %-20s   %-10s  \n" $filename $real_time
     # diff output with reference output file
