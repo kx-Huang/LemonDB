@@ -1,10 +1,8 @@
 #ifndef SAFEQUEUE_H
 #define SAFEQUEUE_H
-
 #include <condition_variable>
 #include <mutex>
 #include <queue>
-
 template <typename T> class SafeQueue {
 private:
   // only one thread can access queue_data at a time
@@ -20,8 +18,7 @@ public:
     // ensures mutex never locked forever
     std::lock_guard<std::mutex> lock(mut);
     queue_data.push(val);
-    // wakes up exactly one blocked thread
-    // which is one of wait_and_pop
+    // wake up exactly one blocked thread
     queue_cond.notify_one();
   }
 
@@ -34,11 +31,7 @@ public:
     // unique lock allows for the transfer
     // of ownership of lock
     std::unique_lock<std::mutex> lock(mut);
-<<<<<<< HEAD
-    queue_cond.wait(lock, [this]{return !queue_data.empty();});
-=======
     queue_cond.wait(lock, [this] { return !queue_data.empty(); });
->>>>>>> e0b4dd119603d9c126cbd2d2bea7648bbec2250d
     value = std::move(queue_data.front());
     queue_data.pop();
   }
@@ -54,6 +47,7 @@ public:
       return false;
     value = std::move(queue_data.front());
     queue_data.pop();
+    return true;
   }
 
   bool empty() const {

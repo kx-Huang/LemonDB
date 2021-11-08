@@ -9,6 +9,7 @@
 #include <functional>
 #include <memory>
 #include <atomic>
+#include <assert.h>
 
 void ThreadNum_Detection();
 
@@ -24,7 +25,16 @@ private:
   SafeQueue<std::function<void()>> workQueue;
   size_t threadNum;
 
-  void thread_run();
+  void thread_run() {
+    assert(Pool::threadNum == 1000); // delete this!!! quiet compiler warning
+    std::function<void()> execute;
+    while (done == false) {
+      if (workQueue.try_pop(execute))
+        execute();
+      else
+        std::this_thread::yield();
+    }
+  }
 
 public:
 
@@ -32,7 +42,7 @@ public:
 
   Pool(size_t threadNum) : done(false), threadNum(threadNum) {
     // TODO: write constructor
-    
+
   }
 
   ~Pool() {
@@ -45,17 +55,5 @@ public:
     workQueue.push(std::function<void()>(f));
   }
 };
-
-void Pool::thread_run() {
-  std::function<void()> execute;
-  while (done == false) {
-    if (workQueue.try_pop(execute))
-      execute();
-    else
-      std::this_thread::yield();
-  }
-
-
-}
 
 #endif // PROJECT_MULTITHREAD_H
