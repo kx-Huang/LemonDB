@@ -21,7 +21,8 @@ public:
     // ensures mutex never locked forever
     std::lock_guard<std::mutex> lock(mut);
     queue_data.push(val);
-    // wake up exactly one blocked thread
+    // wakes up exactly one blocked thread
+    // which is one of wait_and_pop
     queue_cond.notify_one();
   }
 
@@ -34,7 +35,7 @@ public:
     // unique lock allows for the transfer
     // of ownership of lock
     std::unique_lock<std::mutex> lock(mut);
-    data_cond.wait(lock, [this]{return !queue_data.empty();});
+    queue_cond.wait(lock, [this]{return !queue_data.empty();});
     value = std::move(queue_data.front());
     queue_data.pop();
   }
@@ -56,7 +57,5 @@ public:
     return queue_data.empty();
   }
 };
-
-
 
 #endif // PROJECT_SAFEQUEUE_H
