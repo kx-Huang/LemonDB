@@ -27,16 +27,11 @@ QueryResult::Ptr DeleteQuery::execute() {
       for (auto it = table.begin(); it != table.end(); it++) {
         auto key = it->key();
         if (this->evalCondition(*it)) {
-          table.deleteKeyMap(key);
-          counter++;
-        } else {
-          table.moveDatum(it);
-          if (counter != 0)
-            table.forwardKeyMap(key, counter);
+          table.deleteDatum(key);
+          counter++, it--;
         }
       }
     }
-    table.swapTable();
     return make_unique<RecordCountResult>(counter);
   } catch (const TableNameNotFound &e) {
     return make_unique<ErrorMsgResult>(qname, this->targetTable,

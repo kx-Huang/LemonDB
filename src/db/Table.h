@@ -290,27 +290,16 @@ public:
   void insertByKey(KeyType key, std::vector<ValueType> &&data);
 
   /**
-   * Move datum that won't be deleted to dataAfterDelete
-   * @param it
-   */
-  void moveDatum(Iterator it) {
-    auto data = it.it->datum;
-    dataAfterDelete.emplace_back(it->key(), std::move(data));
-  }
-
-  /**
-   * Swap data and dataAfterDelete
-   */
-  void swapTable() {
-    data.clear();
-    std::swap(data, dataAfterDelete);
-  }
-
-  /**
-   * Delete keyMap by its key
+   * Delete Datum by its key
    * @param key
    */
-  void deleteKeyMap(KeyType key) { keyMap.erase(key); }
+  void deleteDatum(KeyType key) {
+    size_t index = (size_t)(((*this)[key])->it - data.begin());
+    keyMap[data.back().key] = index;
+    keyMap.erase(key);
+    data[index] = std::move(data.back());
+    data.pop_back();
+  }
 
   /**
    * Forward a row of data by offset
@@ -327,7 +316,7 @@ public:
    */
   bool evalDuplicate(KeyType key) {
     key.append("_copy");
-    if (this->keyMap.find(key) == this->keyMap.end())
+    if (keyMap.find(key) == keyMap.end())
       return true;
     return false;
   }
