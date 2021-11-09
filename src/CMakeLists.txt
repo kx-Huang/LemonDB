@@ -64,8 +64,8 @@ set(SOURCE_FILES
         query/data/SubQuery.cpp
         utils/formatter.h
         utils/uexception.h
-        multithreads/MultiThread.cpp
-        multithreads/MultiThread.h
+        multithreads/MultiThread.hpp
         )
 add_executable(lemondb main.cpp ${SOURCE_FILES})
 target_link_libraries(lemondb pthread)
+
