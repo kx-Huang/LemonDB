@@ -8,9 +8,11 @@
 #include <iostream>
 #include <string>
 
-#include "multithreads/MultiThread.h"
+#include "multithreads/MultiThread.hpp"
 #include "query/QueryBuilders.h"
 #include "query/QueryParser.h"
+
+Thread_Pool::Thread_Pool worker;
 
 struct {
   std::string listen;
@@ -90,10 +92,10 @@ int main(int argc, char *argv[]) {
     exit(-1);
   } else if (parsedArgs.threads == 0) {
     // @TODO Auto detect the thread num
-    ThreadNum_Detection();
+    worker.pool_set((int)std::thread::hardware_concurrency());
     std::cerr << "lemondb: info: auto detect thread num" << std::endl;
   } else {
-    set_ThreadNum((unsigned int)parsedArgs.threads);
+    worker.pool_set((int)parsedArgs.threads);
     std::cerr << "lemondb: info: running in " << parsedArgs.threads
               << " threads" << std::endl;
   }
