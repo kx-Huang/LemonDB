@@ -4,6 +4,8 @@
 
 #include "DeleteQuery.h"
 #include "../../db/Database.h"
+#include <iostream>
+using namespace std;
 
 constexpr const char *DeleteQuery::qname;
 
@@ -14,28 +16,22 @@ QueryResult::Ptr DeleteQuery::execute() {
         qname, this->targetTable.c_str(),
         "Invalid number of operands (? operands)."_f % operands.size());
   Database &db = Database::getInstance();
-  Table::SizeType counter(0); // number of affected rows;
+  // start of try
   try {
-    // std::cout << "here!\n";
-    auto table = &db[this->targetTable];
+    size_t counter = 0;
+    auto &table = db[this->targetTable];
     if (this->condition.empty())
       return make_unique<RecordCountResult>(counter);
-    auto result = initCondition(*table);
-    vector<Table::KeyType> keys;
+    auto result = initCondition(table);
     if (result.second) {
-      for (auto it = table->begin(); it != table->end(); it++) {
+      for (auto it = table.begin(); it != table.end(); it++) {
+        auto key = it->key();
         if (this->evalCondition(*it)) {
-          keys.push_back((*it).key());
-          table->forwardByOffset((*it).key(), counter);
-          counter++;
-        } else {
-          if (counter != 0)
-            table->forwardByOffset((*it).key(), counter);
+          table.deleteDatum(key);
+          counter++, it--;
         }
       }
     }
-    for (auto it = keys.begin(); it != keys.end(); it++)
-      table->deleteByKey(*it);
     return make_unique<RecordCountResult>(counter);
   } catch (const TableNameNotFound &e) {
     return make_unique<ErrorMsgResult>(qname, this->targetTable,

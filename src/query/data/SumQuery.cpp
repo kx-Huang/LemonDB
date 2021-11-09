@@ -6,7 +6,8 @@ constexpr const char *SumQuery::qname;
 QueryResult::Ptr SumQuery::execute() {
   using namespace std;
   Database &db = Database::getInstance();
-  if (this->operands.size() <= 0)
+  auto size = this->operands.size();
+  if (size <= 0)
     return make_unique<ErrorMsgResult>(
         qname, this->targetTable.c_str(),
         "Invalid number of operands (? operands)."_f % operands.size());
@@ -14,20 +15,19 @@ QueryResult::Ptr SumQuery::execute() {
   try {
     auto &table = db[this->targetTable];
     auto result = initCondition(table);
-    int *int_arr = new int[(this->operands).size()];
-    for (size_t i(0); i < this->operands.size(); i++) {
+    int *int_arr = new int[size];
+    for (size_t i = 0; i < size; i++)
       int_arr[i] = 0;
-    }
     if (result.second) {
       for (auto row = table.begin(); row != table.end(); ++row) {
         if (this->evalCondition(*row)) {
-          for (size_t i(0); i < this->operands.size(); i++) {
+          for (size_t i = 0; i < size; i++) {
             int_arr[i] += (*row)[this->operands[i]];
           }
         }
       }
     }
-    return make_unique<SuccessMsgResult>(int_arr, this->operands.size());
+    return make_unique<SuccessMsgResult>(int_arr, size);
   } catch (const TableNameNotFound &e) {
     return make_unique<ErrorMsgResult>(qname, this->targetTable,
                                        "No such table."s);

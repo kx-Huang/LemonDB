@@ -86,6 +86,8 @@ private:
 
   /** The rows are saved in a vector, which is unsorted */
   std::vector<Datum> data;
+  std::vector<Datum> dataAfterDelete;
+
   /** Used to keep the keys unique and provide O(1) access with key */
   std::unordered_map<KeyType, SizeType> keyMap;
 
@@ -288,12 +290,15 @@ public:
   void insertByKey(KeyType key, std::vector<ValueType> &&data);
 
   /**
-   * Delete a row of data by its key
+   * Delete Datum by its key
    * @param key
    */
-  void deleteByKey(KeyType key) {
-    this->data.erase(((*this)[key])->it);
-    this->keyMap.erase(key);
+  void deleteDatum(KeyType key) {
+    size_t index = (size_t)(((*this)[key])->it - data.begin());
+    keyMap[data.back().key] = index;
+    keyMap.erase(key);
+    data[index] = std::move(data.back());
+    data.pop_back();
   }
 
   /**
@@ -301,8 +306,8 @@ public:
    * @param key
    * @param offset
    */
-  void forwardByOffset(KeyType key, Table::SizeType offset) {
-    this->keyMap[key] -= offset;
+  void forwardKeyMap(KeyType key, Table::SizeType offset) {
+    keyMap[key] -= offset;
   }
 
   /**
@@ -311,7 +316,7 @@ public:
    */
   bool evalDuplicate(KeyType key) {
     key.append("_copy");
-    if (this->keyMap.find(key) == this->keyMap.end())
+    if (keyMap.find(key) == keyMap.end())
       return true;
     return false;
   }

@@ -70,11 +70,10 @@ QueryResult::Ptr AddQuery::execute() {
         for (auto it = table.begin(); it != table.end(); ++it) {
           if (this->evalCondition(*it)) {
             int sum = 0;
-            for (auto key = this->operands.begin();
-                 key != this->operands.end() - 1; key++) {
+            auto key = this->operands.begin();
+            for (; key != this->operands.end() - 1; key++)
               sum += (*it)[*key];
-            }
-            (*it)[*(this->operands.end() - 1)] = sum;
+            (*it)[*key] = sum;
             counter++;
           }
         }

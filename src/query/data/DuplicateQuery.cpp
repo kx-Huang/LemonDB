@@ -11,21 +11,22 @@ QueryResult::Ptr DuplicateQuery::execute() {
   Database &db = Database::getInstance();
   // start of try
   try {
-    auto table = &db[this->targetTable];
-    auto result = initCondition(*table);
+    auto &table = db[this->targetTable];
+    auto result = initCondition(table);
     vector<Table::KeyType> keys;
-    Table::SizeType counter(0);
+    auto counter = 0;
     if (result.second) {
-      auto end = table->end();
-      for (auto it = table->begin(); it != end; it++) {
-        if (this->evalCondition(*it) && table->evalDuplicate((*it).key())) {
-          keys.push_back((*it).key());
+      auto end = table.end();
+      for (auto it = table.begin(); it != end; it++) {
+        auto key = it->key();
+        if (this->evalCondition(*it) && table.evalDuplicate(key)) {
+          keys.push_back(key);
           counter++;
         }
       }
     }
     for (auto it = keys.begin(); it != keys.end(); it++)
-      table->duplicateByKey(*it);
+      table.duplicateByKey(*it);
     return make_unique<RecordCountResult>(counter);
   } catch (const TableNameNotFound &e) {
     return make_unique<ErrorMsgResult>(qname, this->targetTable,

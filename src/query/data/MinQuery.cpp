@@ -5,10 +5,11 @@ constexpr const char *MinQuery::qname;
 
 QueryResult::Ptr MinQuery::execute() {
   using namespace std;
-  if (this->operands.size() == 0)
+  auto size = this->operands.size();
+  if (size == 0)
     return make_unique<ErrorMsgResult>(
         qname, this->targetTable.c_str(),
-        "Invalid number of operands (? operands)."_f % operands.size());
+        "Invalid number of operands (? operands)."_f % size);
   Database &db = Database::getInstance();
   // start of try
   try {
@@ -16,13 +17,13 @@ QueryResult::Ptr MinQuery::execute() {
     auto &table = db[this->targetTable];
     auto result = initCondition(table);
     int *int_arr = new int[(this->operands).size()];
-    for (size_t i(0); i < this->operands.size(); i++)
+    for (size_t i = 0; i < size; i++)
       int_arr[i] = INT32_MAX;
     if (result.second) {
       for (auto row = table.begin(); row != table.end(); ++row) {
         if (this->evalCondition(*row)) {
           found = true;
-          for (size_t i(0); i < this->operands.size(); i++) {
+          for (size_t i(0); i < size; i++) {
             if (int_arr[i] > (*row)[this->operands[i]])
               int_arr[i] = (*row)[this->operands[i]];
           }
@@ -30,7 +31,7 @@ QueryResult::Ptr MinQuery::execute() {
       }
     }
     if (found)
-      return make_unique<SuccessMsgResult>(int_arr, this->operands.size());
+      return make_unique<SuccessMsgResult>(int_arr, size);
     else
       return make_unique<NullQueryResult>();
   } catch (const TableNameNotFound &e) {

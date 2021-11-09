@@ -14,7 +14,7 @@ QueryResult::Ptr CountQuery::execute() {
   try {
     auto &table = db[this->targetTable];
     auto result = initCondition(table);
-    int counter(0);
+    size_t counter = 0;
     if (result.second) {
       for (auto it = table.begin(); it != table.end(); ++it)
         if (this->evalCondition(*it))
