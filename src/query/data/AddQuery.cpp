@@ -2,7 +2,7 @@
 #include <iostream>
 
 #include "../../db/Database.h"
-#include "../../multithreads/MultiThread.h"
+#include "../../multithreads/MultiThread.hpp"
 #include <algorithm>
 #include <pthread.h>
 #include <semaphore.h>
@@ -10,26 +10,22 @@
 /*Define Global Varaibles*/
 constexpr const char *AddQuery::qname;
 static size_t counter;
-static unsigned int current_thread;
+
 static unsigned int total_thread;
 static unsigned int subtable_num;
-static pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
+
 static Table *copy_table;
 static ComplexQuery *copy_this;
 static std::vector<std::string> *copy_operand;
 static std::pair<std::string, bool> result;
 /**********************************************/
 
-void *Sub_AddQuery(void *) {
-  pthread_mutex_lock(&mutex);
-  int id = (int)current_thread;
-  current_thread++;
-  pthread_mutex_unlock(&mutex);
+void Sub_AddQuery(int id) {
 
   auto head = copy_table->begin() + (id * (int)subtable_num);
   auto tail = id == (int)total_thread - 1 ? copy_table->end()
                                           : head + (int)subtable_num;
-
+  
   if (result.second) {
     int sub_counter = 0;
     for (auto item = head; item != tail; item++) {
@@ -43,11 +39,9 @@ void *Sub_AddQuery(void *) {
         (*item)[*(copy_operand->end() - 1)] = sum;
       }
     }
-    pthread_mutex_lock(&mutex);
     counter = counter + (size_t)sub_counter;
-    pthread_mutex_unlock(&mutex);
   }
-  return NULL;
+  return;
 }
 
 QueryResult::Ptr AddQuery::execute() {
@@ -62,7 +56,7 @@ QueryResult::Ptr AddQuery::execute() {
     auto &table = db[this->targetTable];
     result = initCondition(table);
     counter = 0;
-    total_thread = get_ThreadNum();
+    total_thread = (unsigned int) worker.Thread_count();
     //  return make_unique<RecordCountResult>(total_thread*100);
     copy_operand = &this->operands;
     if (total_thread < 2 || table.size() < 16) {
@@ -70,10 +64,11 @@ QueryResult::Ptr AddQuery::execute() {
         for (auto it = table.begin(); it != table.end(); ++it) {
           if (this->evalCondition(*it)) {
             int sum = 0;
-            auto key = this->operands.begin();
-            for (; key != this->operands.end() - 1; key++)
+            for (auto key = this->operands.begin();
+                 key != this->operands.end() - 1; key++) {
               sum += (*it)[*key];
-            (*it)[*key] = sum;
+            }
+            (*it)[*(this->operands.end() - 1)] = sum;
             counter++;
           }
         }
@@ -82,18 +77,18 @@ QueryResult::Ptr AddQuery::execute() {
       copy_table = &table;
       copy_this = this;
       subtable_num = (unsigned int)(table.size()) / total_thread;
-      pthread_t *store = new pthread_t[total_thread - 1];
-      current_thread = 0;
-      for (int i = 0; i < (int)total_thread - 1; i++) {
-        pthread_create(store + i, NULL, Sub_AddQuery, &i);
+      std::vector<std::future<void>> futures((unsigned long)total_thread);
+      for(int i = 0; i<(int)total_thread - 1; i++){
+        futures[(unsigned long)i] = worker.Submit(Sub_AddQuery, i);
       }
-      Sub_AddQuery(NULL);
-      for (int i = 0; i < (int)total_thread - 1; i++) {
-        pthread_join(*(store + i), NULL);
+      Sub_AddQuery((int)total_thread - 1);
+      for (unsigned long i = 0; i<(unsigned long)total_thread - 1;i++){
+        futures[i].get();
       }
-      delete[] store;
     }
     return make_unique<RecordCountResult>(counter);
+
+      
   } catch (const TableNameNotFound &e) {
     return make_unique<ErrorMsgResult>(qname, this->targetTable,
                                        "No such table."s);
