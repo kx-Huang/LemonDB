@@ -16,22 +16,21 @@ static ComplexQuery *copy_this;
 static std::pair<std::string, bool> result;
 static size_t counter;
 /**********************************************/
-void Sub_Swap(int id, size_t fid1, size_t fid2){
+void Sub_Swap(int id, size_t fid1, size_t fid2) {
   auto head = copy_table->begin() + (id * (int)subtable_num);
   auto tail = id == (int)total_thread - 1 ? copy_table->end()
                                           : head + (int)subtable_num;
-  if (result.second){
-    for (auto it = head; it != tail; it++){
-       if (copy_this->evalCondition(*it)) {
-          Table::ValueType temp = (*it)[fid2];
-          (*it)[fid2] = (*it)[fid1];
-          (*it)[fid1] = temp;
-          ++counter;
+  if (result.second) {
+    for (auto it = head; it != tail; it++) {
+      if (copy_this->evalCondition(*it)) {
+        Table::ValueType temp = (*it)[fid2];
+        (*it)[fid2] = (*it)[fid1];
+        (*it)[fid1] = temp;
+        ++counter;
       }
     }
   }
 }
-
 
 QueryResult::Ptr SwapQuery::execute() {
   using namespace std;
@@ -45,32 +44,31 @@ QueryResult::Ptr SwapQuery::execute() {
     auto &table = db[this->targetTable];
     result = initCondition(table);
     counter = 0;
-    total_thread = (unsigned int) worker.Thread_count();
+    total_thread = (unsigned int)worker.Thread_count();
     fid1 = table.getFieldIndex(this->operands[0]);
     fid2 = table.getFieldIndex(this->operands[1]);
     auto result = initCondition(table);
-    if (total_thread < 2 || table.size() < 16){
-    if (result.second) {
-      for (auto it = table.begin(); it != table.end(); ++it) {
-        if (this->evalCondition(*it)) {
-          Table::ValueType temp = (*it)[fid2];
-          (*it)[fid2] = (*it)[fid1];
-          (*it)[fid1] = temp;
-          ++counter;
+    if (total_thread < 2 || table.size() < 16) {
+      if (result.second) {
+        for (auto it = table.begin(); it != table.end(); ++it) {
+          if (this->evalCondition(*it)) {
+            Table::ValueType temp = (*it)[fid2];
+            (*it)[fid2] = (*it)[fid1];
+            (*it)[fid1] = temp;
+            ++counter;
+          }
         }
       }
-    }
-    }
-    else{
+    } else {
       copy_table = &table;
       copy_this = this;
       subtable_num = (unsigned int)(table.size()) / total_thread;
       std::vector<std::future<void>> futures((unsigned long)total_thread);
-      for(int i = 0; i<(int)total_thread - 1; i++){
+      for (int i = 0; i < (int)total_thread - 1; i++) {
         futures[(unsigned long)i] = worker.Submit(Sub_Swap, i, fid1, fid2);
       }
       Sub_Swap((int)total_thread - 1, fid1, fid2);
-      for (unsigned long i = 0; i<(unsigned long)total_thread - 1;i++){
+      for (unsigned long i = 0; i < (unsigned long)total_thread - 1; i++) {
         futures[i].get();
       }
     }

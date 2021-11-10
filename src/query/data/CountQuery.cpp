@@ -15,9 +15,7 @@ static std::vector<std::string> *copy_operand;
 static std::pair<std::string, bool> result;
 /**********************************************/
 
-
-
-void Sub_Count(int id){
+void Sub_Count(int id) {
   auto head = copy_table->begin() + (id * (int)subtable_num);
   auto tail = id == (int)total_thread - 1 ? copy_table->end()
                                           : head + (int)subtable_num;
@@ -43,25 +41,24 @@ QueryResult::Ptr CountQuery::execute() {
     auto &table = db[this->targetTable];
     auto result = initCondition(table);
     counter = 0;
-    total_thread = (unsigned int) worker.Thread_count();
+    total_thread = (unsigned int)worker.Thread_count();
     copy_operand = &this->operands;
-    if (total_thread < 2 || table.size() < 16){
-    if (result.second) {
-      for (auto it = table.begin(); it != table.end(); ++it)
-        if (this->evalCondition(*it))
-          counter++;
+    if (total_thread < 2 || table.size() < 16) {
+      if (result.second) {
+        for (auto it = table.begin(); it != table.end(); ++it)
+          if (this->evalCondition(*it))
+            counter++;
       }
-    }
-    else {
+    } else {
       copy_table = &table;
       copy_this = this;
       subtable_num = (unsigned int)(table.size()) / total_thread;
       std::vector<std::future<void>> futures((unsigned long)total_thread);
-      for(int i = 0; i<(int)total_thread - 1; i++){
+      for (int i = 0; i < (int)total_thread - 1; i++) {
         futures[(unsigned long)i] = worker.Submit(Sub_Count, i);
       }
       Sub_Count((int)total_thread - 1);
-      for (unsigned long i = 0; i<(unsigned long)total_thread - 1;i++){
+      for (unsigned long i = 0; i < (unsigned long)total_thread - 1; i++) {
         futures[i].get();
       }
     }

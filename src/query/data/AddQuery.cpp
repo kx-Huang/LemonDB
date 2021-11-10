@@ -25,7 +25,7 @@ void Sub_AddQuery(int id) {
   auto head = copy_table->begin() + (id * (int)subtable_num);
   auto tail = id == (int)total_thread - 1 ? copy_table->end()
                                           : head + (int)subtable_num;
-  
+
   if (result.second) {
     int sub_counter = 0;
     for (auto item = head; item != tail; item++) {
@@ -56,7 +56,7 @@ QueryResult::Ptr AddQuery::execute() {
     auto &table = db[this->targetTable];
     result = initCondition(table);
     counter = 0;
-    total_thread = (unsigned int) worker.Thread_count();
+    total_thread = (unsigned int)worker.Thread_count();
     //  return make_unique<RecordCountResult>(total_thread*100);
     copy_operand = &this->operands;
     if (total_thread < 2 || table.size() < 16) {
@@ -78,17 +78,16 @@ QueryResult::Ptr AddQuery::execute() {
       copy_this = this;
       subtable_num = (unsigned int)(table.size()) / total_thread;
       std::vector<std::future<void>> futures((unsigned long)total_thread);
-      for(int i = 0; i<(int)total_thread - 1; i++){
+      for (int i = 0; i < (int)total_thread - 1; i++) {
         futures[(unsigned long)i] = worker.Submit(Sub_AddQuery, i);
       }
       Sub_AddQuery((int)total_thread - 1);
-      for (unsigned long i = 0; i<(unsigned long)total_thread - 1;i++){
+      for (unsigned long i = 0; i < (unsigned long)total_thread - 1; i++) {
         futures[i].get();
       }
     }
     return make_unique<RecordCountResult>(counter);
 
-      
   } catch (const TableNameNotFound &e) {
     return make_unique<ErrorMsgResult>(qname, this->targetTable,
                                        "No such table."s);
