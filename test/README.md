@@ -99,6 +99,8 @@ lemondb: info: running in 1 threads
 
 ### setup
 
+- copy frmo remote server `/opt/lemondb/sample` to local `sample`
+- copy frmo remote server `/opt/lemondb/db` to local `db`
 - copy from remote server `/opt/lemondb/sample_dump` to local `test/ref_dump`
 - copy from remote server `/opt/lemondb/sample_stdout` to local `test/ref_stdout`
 
