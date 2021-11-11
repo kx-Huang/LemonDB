@@ -3,15 +3,13 @@
 
 #include "../../db/Database.h"
 #include "../../multithreads/MultiThread.hpp"
-#include <algorithm>
-#include <pthread.h>
-#include <semaphore.h>
+
 
 /**********************************************/
 /*Define Global Varaibles*/
 
 static size_t counter;
-// static unsigned int current_thread;
+//static unsigned int current_thread;
 static unsigned int total_thread;
 static unsigned int subtable_num;
 
@@ -76,11 +74,11 @@ QueryResult::Ptr SubQuery::execute() {
       copy_this = this;
       subtable_num = (unsigned int)(table.size()) / total_thread;
       std::vector<std::future<void>> futures((unsigned long)total_thread);
-      for (int i = 0; i < (int)total_thread - 1; i++) {
+      for(int i = 0; i<(int)total_thread - 1; i++){
         futures[(unsigned long)i] = worker.Submit(Sub_SubQuery, i);
       }
       Sub_SubQuery((int)total_thread - 1);
-      for (int i = 0; i < (int)total_thread - 1; i++) {
+      for (int i = 0; i<(int)total_thread - 1;i++){
         futures[(unsigned long)i].get();
       }
     }
