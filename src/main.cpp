@@ -7,7 +7,7 @@
 #include <fstream>
 #include <iostream>
 #include <string>
-
+#include <thread>
 #include "multithreads/MultiThread.hpp"
 #include "query/QueryBuilders.h"
 #include "query/QueryParser.h"
