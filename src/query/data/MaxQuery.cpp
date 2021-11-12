@@ -13,24 +13,28 @@ static std::vector<std::string> *copy_operand;
 static std::pair<std::string, bool> result;
 static int *int_arr;
 static bool found;
+static std::mutex  m_mutex;
 /**********************************************/
-void Sub_max(int id) {
+void Sub_max(int id){
   auto head = copy_table->begin() + (id * (int)subtable_num);
   auto tail = id == (int)total_thread - 1 ? copy_table->end()
                                           : head + (int)subtable_num;
   if (result.second) {
-    for (auto row = head; row != tail; row++) {
+    for (auto row = head; row != tail; row++){
       if (copy_this->evalCondition(*row)) {
-        found = true;
-        for (size_t i(0); i < copy_operand->size(); i++) {
-          if (int_arr[i] < (*row)[(*copy_operand)[i]]) {
-            int_arr[i] = (*row)[(*copy_operand)[i]];
+          found = true;
+          for (size_t i(0); i < copy_operand->size(); i++) {
+            m_mutex.lock();
+            if (int_arr[i] < (*row)[(*copy_operand)[i]]) {
+              int_arr[i] = (*row)[(*copy_operand)[i]];
+            }
+            m_mutex.unlock();
           }
         }
-      }
     }
   }
 }
+
 
 QueryResult::Ptr MaxQuery::execute() {
   using namespace std;
@@ -45,32 +49,34 @@ QueryResult::Ptr MaxQuery::execute() {
     auto &table = db[this->targetTable];
     result = initCondition(table);
     int_arr = new int[(this->operands).size()];
-    total_thread = (unsigned int)worker.Thread_count();
+    total_thread = (unsigned int) worker.Thread_count();
+    copy_operand = &this->operands;
     for (size_t i(0); i < this->operands.size(); i++)
       int_arr[i] = INT32_MIN;
-    if (total_thread < 2 || table.size() < 16) {
-      if (result.second) {
-        for (auto row = table.begin(); row != table.end(); ++row) {
-          if (this->evalCondition(*row)) {
-            found = true;
-            for (size_t i(0); i < this->operands.size(); i++) {
-              if (int_arr[i] < (*row)[this->operands[i]]) {
-                int_arr[i] = (*row)[this->operands[i]];
-              }
+    if (total_thread < 2 || table.size() < 16){
+    if (result.second) {
+      for (auto row = table.begin(); row != table.end(); ++row) {
+        if (this->evalCondition(*row)) {
+          found = true;
+          for (size_t i(0); i < this->operands.size(); i++) {
+            if (int_arr[i] < (*row)[this->operands[i]]) {
+              int_arr[i] = (*row)[this->operands[i]];
             }
           }
         }
       }
-    } else {
+    }
+    }
+    else{
       copy_table = &table;
       copy_this = this;
       subtable_num = (unsigned int)(table.size()) / total_thread;
       std::vector<std::future<void>> futures((unsigned long)total_thread);
-      for (int i = 0; i < (int)total_thread - 1; i++) {
+      for(int i = 0; i<(int)total_thread - 1; i++){
         futures[(unsigned long)i] = worker.Submit(Sub_max, i);
       }
       Sub_max((int)total_thread - 1);
-      for (unsigned long i = 0; i < (unsigned long)total_thread - 1; i++) {
+      for (unsigned long i = 0; i<(unsigned long)total_thread - 1;i++){
         futures[i].get();
       }
     }

@@ -18,6 +18,7 @@ static std::pair<std::string, bool> result;
 static ComplexQuery *copy_this;
 static std::vector<std::string> *copy_operand;
 constexpr const char *SubQuery::qname;
+static std::mutex  m_mutex;
 /**********************************************/
 
 void Sub_SubQuery(int id) {
@@ -37,7 +38,9 @@ void Sub_SubQuery(int id) {
         (*it)[*(copy_operand->end() - 1)] = ans;
       }
     }
+    m_mutex.lock();
     counter = counter + (size_t)sub_counter;
+    m_mutex.unlock();
   }
   return;
 }
