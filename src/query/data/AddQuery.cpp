@@ -16,6 +16,7 @@ static Table *copy_table;
 static ComplexQuery *copy_this;
 static std::vector<std::string> *copy_operand;
 static std::pair<std::string, bool> result;
+static std::mutex  m_mutex;
 /**********************************************/
 
 void Sub_AddQuery(int id) {
@@ -37,7 +38,9 @@ void Sub_AddQuery(int id) {
         (*item)[*(copy_operand->end() - 1)] = sum;
       }
     }
+    m_mutex.lock();
     counter = counter + (size_t)sub_counter;
+    m_mutex.unlock();
   }
   return;
 }
