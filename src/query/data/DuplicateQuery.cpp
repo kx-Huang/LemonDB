@@ -11,15 +11,20 @@ static unsigned int subtable_num;
 static Table *copy_table;
 static ComplexQuery *copy_this;
 static std::pair<std::string, bool> result;
-static std::mutex  m_mutex;
 static std::vector<Table::KeyType> keys;
+ using namespace std;
+struct Ret_Dup{
+  size_t subcounter;
+  vector<Table::KeyType> sub_keys;
+};
+
 /**********************************************/
 
-void Sub_Duplicate(int id){
-  using namespace std;
+Ret_Dup Sub_Duplicate(int id){
   auto head = copy_table->begin() + (id * (int)subtable_num);
   auto tail = id == (int)total_thread - 1 ? copy_table->end()
                                           : head + (int)subtable_num;
+  Ret_Dup temp;
   if (result.second){
      vector<Table::KeyType> sub_keys;
      size_t sub_counter = 0;
@@ -30,12 +35,10 @@ void Sub_Duplicate(int id){
           sub_counter++;
         }
       }
-    m_mutex.lock();
-    keys.insert(keys.end(), sub_keys.begin(), sub_keys.end());
-    counter = counter + sub_counter;
-    m_mutex.unlock();
+    temp.sub_keys = sub_keys;
+    temp.subcounter = sub_counter;
   }
-  return;
+  return temp;
 }
 
 
@@ -71,13 +74,17 @@ QueryResult::Ptr DuplicateQuery::execute() {
       copy_table = &table;
       copy_this = this;
       subtable_num = (unsigned int)(table.size()) / total_thread;
-      std::vector<std::future<void>> futures((unsigned long)total_thread);
+      std::vector<std::future<Ret_Dup>> futures((unsigned long)total_thread);
       for(int i = 0; i<(int)total_thread - 1; i++){
         futures[(unsigned long)i] = worker.Submit(Sub_Duplicate, i);
       }
-      Sub_Duplicate((int)total_thread - 1);
+      Ret_Dup temp = Sub_Duplicate((int)total_thread - 1);
+      counter = temp.subcounter;
+      keys.insert(keys.end(), temp.sub_keys.begin(), temp.sub_keys.end());
       for (unsigned long i = 0; i<(unsigned long)total_thread - 1;i++){
-        futures[i].get();
+        temp = futures[i].get();
+        keys.insert(keys.end(), temp.sub_keys.begin(), temp.sub_keys.end());
+        counter = counter + temp.subcounter;
       }
       for (auto it = keys.begin(); it != keys.end(); it++)
         table.duplicateByKey(*it); 
