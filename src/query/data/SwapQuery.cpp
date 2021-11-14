@@ -14,14 +14,13 @@ static unsigned int subtable_num;
 static Table *copy_table;
 static ComplexQuery *copy_this;
 static std::pair<std::string, bool> result;
-static size_t counter;
-static std::mutex  m_mutex;
+static int counter;
 /**********************************************/
-void Sub_Swap(int id, size_t fid1, size_t fid2){
+int Sub_Swap(int id, size_t fid1, size_t fid2){
   auto head = copy_table->begin() + (id * (int)subtable_num);
   auto tail = id == (int)total_thread - 1 ? copy_table->end()
                                           : head + (int)subtable_num;
-  size_t sub_counter = 0;
+  int sub_counter = 0;
   if (result.second){
     for (auto it = head; it != tail; it++){
        if (copy_this->evalCondition(*it)) {
@@ -32,9 +31,7 @@ void Sub_Swap(int id, size_t fid1, size_t fid2){
       }
     }
   }
-    m_mutex.lock();
-    counter = counter + sub_counter;
-    m_mutex.unlock();
+  return sub_counter;
 }
 
 
@@ -69,16 +66,16 @@ QueryResult::Ptr SwapQuery::execute() {
       copy_table = &table;
       copy_this = this;
       subtable_num = (unsigned int)(table.size()) / total_thread;
-      std::vector<std::future<void>> futures((unsigned long)total_thread);
+      std::vector<std::future<int>> futures((unsigned long)total_thread);
       for(int i = 0; i<(int)total_thread - 1; i++){
         futures[(unsigned long)i] = worker.Submit(Sub_Swap, i, fid1, fid2);
       }
-      Sub_Swap((int)total_thread - 1, fid1, fid2);
+      counter = Sub_Swap((int)total_thread - 1, fid1, fid2);
       for (unsigned long i = 0; i<(unsigned long)total_thread - 1;i++){
-        futures[i].get();
+        counter = counter + futures[i].get();
       }
     }
-    return make_unique<RecordCountResult>(counter);
+    return make_unique<RecordCountResult>((size_t)counter);
   } catch (const TableNameNotFound &e) {
     return make_unique<ErrorMsgResult>(qname, this->targetTable,
                                        "No such table."s);
