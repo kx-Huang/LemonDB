@@ -18,17 +18,24 @@ void Sub_Sum(int id){
   auto head = copy_table->begin() + (id * (int)subtable_num);
   auto tail = id == (int)total_thread - 1 ? copy_table->end()
                                           : head + (int)subtable_num;
+  int* sub_int_arr = new int[copy_operand->size()];
+  for (size_t i(0); i < copy_operand->size(); i++) {
+      sub_int_arr[i] = 0;
+    }
   if (result.second) {
     for (auto row = head; row != tail; ++row) {
         if (copy_this->evalCondition(*row)) {
           for (size_t i(0); i < copy_operand->size(); i++) {
-            m_mutex.lock();
-            int_arr[i] += (*row)[(*copy_operand)[i]];
-            m_mutex.unlock();
+            sub_int_arr[i] += (*row)[(*copy_operand)[i]];
           }
         }
     }
   }
+  m_mutex.lock();
+  for (size_t i(0); i < copy_operand->size(); i++){
+      int_arr[i] = int_arr[i]+sub_int_arr[i];
+  }
+  m_mutex.unlock();
   return;
 }
 

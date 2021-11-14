@@ -19,20 +19,28 @@ void Sub_max(int id){
   auto head = copy_table->begin() + (id * (int)subtable_num);
   auto tail = id == (int)total_thread - 1 ? copy_table->end()
                                           : head + (int)subtable_num;
+  int *sub_int_arr = new int[copy_operand->size()];
+   for (size_t i(0); i < copy_operand->size(); i++)
+      sub_int_arr[i] = INT32_MIN;
   if (result.second) {
     for (auto row = head; row != tail; row++){
       if (copy_this->evalCondition(*row)) {
           found = true;
           for (size_t i(0); i < copy_operand->size(); i++) {
-            m_mutex.lock();
-            if (int_arr[i] < (*row)[(*copy_operand)[i]]) {
-              int_arr[i] = (*row)[(*copy_operand)[i]];
+            if (sub_int_arr[i] < (*row)[(*copy_operand)[i]]) {
+              sub_int_arr[i] = (*row)[(*copy_operand)[i]];
             }
-            m_mutex.unlock();
           }
         }
     }
   }
+  m_mutex.lock();
+  for (size_t i(0); i < copy_operand->size(); i++){
+    if (int_arr[i] < sub_int_arr[i]){
+      int_arr[i] = sub_int_arr[i];
+    }
+  }
+  m_mutex.unlock();
 }
 
 

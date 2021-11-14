@@ -18,15 +18,14 @@ static std::pair<std::string, bool> result;
 static ComplexQuery *copy_this;
 static std::vector<std::string> *copy_operand;
 constexpr const char *SubQuery::qname;
-static std::mutex  m_mutex;
 /**********************************************/
 
-void Sub_SubQuery(int id) {
+int Sub_SubQuery(int id) {
   auto head = copy_table->begin() + (id * (int)subtable_num);
   auto tail = id == (int)total_thread - 1 ? copy_table->end()
                                           : head + (int)subtable_num;
+  int sub_counter = 0;
   if (result.second) {
-    int sub_counter = 0;
     for (auto it = head; it != tail; it++) {
       if (copy_this->evalCondition(*it)) {
         sub_counter++;
@@ -38,11 +37,8 @@ void Sub_SubQuery(int id) {
         (*it)[*(copy_operand->end() - 1)] = ans;
       }
     }
-    m_mutex.lock();
-    counter = counter + (size_t)sub_counter;
-    m_mutex.unlock();
   }
-  return;
+  return sub_counter;
 }
 
 QueryResult::Ptr SubQuery::execute() {
@@ -76,13 +72,13 @@ QueryResult::Ptr SubQuery::execute() {
       copy_table = &table;
       copy_this = this;
       subtable_num = (unsigned int)(table.size()) / total_thread;
-      std::vector<std::future<void>> futures((unsigned long)total_thread);
+      std::vector<std::future<int>> futures((unsigned long)total_thread);
       for(int i = 0; i<(int)total_thread - 1; i++){
         futures[(unsigned long)i] = worker.Submit(Sub_SubQuery, i);
       }
-      Sub_SubQuery((int)total_thread - 1);
+      counter = (size_t) Sub_SubQuery((int)total_thread - 1);
       for (int i = 0; i<(int)total_thread - 1;i++){
-        futures[(unsigned long)i].get();
+        counter = counter + (size_t)futures[(unsigned long)i].get();
       }
     }
     return make_unique<RecordCountResult>(counter);
