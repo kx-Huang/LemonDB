@@ -7,8 +7,8 @@ QueryResult::Ptr TruncateTableQuery::execute() {
   using namespace std;
   Database &db = Database::getInstance();
   try {
-    auto table = &db[this->targetTable];
-    table->clear();
+    auto &table = db[this->targetTable];
+    table.clear();
     return make_unique<NullQueryResult>();
   } catch (const TableNameNotFound &e) {
     return make_unique<ErrorMsgResult>(qname, this->targetTable,

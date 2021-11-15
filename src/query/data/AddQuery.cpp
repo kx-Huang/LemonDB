@@ -1,6 +1,4 @@
 #include "AddQuery.h"
-#include <iostream>
-
 #include "../../db/Database.h"
 #include "../../multithreads/MultiThread.hpp"
 
@@ -8,10 +6,8 @@
 /*Define Global Varaibles*/
 constexpr const char *AddQuery::qname;
 static size_t counter;
-
 static unsigned int total_thread;
 static unsigned int subtable_num;
-
 static Table *copy_table;
 static ComplexQuery *copy_this;
 static std::vector<std::string> *copy_operand;
@@ -19,11 +15,9 @@ static std::pair<std::string, bool> result;
 /**********************************************/
 
 int Sub_AddQuery(int id) {
-
   auto head = copy_table->begin() + (id * (int)subtable_num);
   auto tail = id == (int)total_thread - 1 ? copy_table->end()
                                           : head + (int)subtable_num;
-  
   int sub_counter = 0;
   if (result.second) {
     for (auto item = head; item != tail; item++) {
@@ -53,8 +47,7 @@ QueryResult::Ptr AddQuery::execute() {
     auto &table = db[this->targetTable];
     result = initCondition(table);
     counter = 0;
-    total_thread = (unsigned int) worker.Thread_count();
-    //  return make_unique<RecordCountResult>(total_thread*100);
+    total_thread = (unsigned int)worker.Thread_count();
     copy_operand = &this->operands;
     if (total_thread < 2 || table.size() < 16) {
       if (result.second) {
@@ -74,18 +67,16 @@ QueryResult::Ptr AddQuery::execute() {
       copy_table = &table;
       copy_this = this;
       subtable_num = (unsigned int)(table.size()) / total_thread;
-      std::vector<std::future<int>> futures((unsigned long)total_thread);
-      for(int i = 0; i<(int)total_thread - 1; i++){
+      vector<future<int>> futures((unsigned long)total_thread);
+      for (int i = 0; i < (int)total_thread - 1; i++) {
         futures[(unsigned long)i] = worker.Submit(Sub_AddQuery, i);
       }
-      counter = (size_t) Sub_AddQuery((int)total_thread - 1);
-      for (unsigned long i = 0; i<(unsigned long)total_thread - 1;i++){
-        counter = counter + (size_t) futures[i].get();
+      counter = (size_t)Sub_AddQuery((int)total_thread - 1);
+      for (unsigned long i = 0; i < (unsigned long)total_thread - 1; i++) {
+        counter = counter + (size_t)futures[i].get();
       }
     }
     return make_unique<RecordCountResult>(counter);
-
-      
   } catch (const TableNameNotFound &e) {
     return make_unique<ErrorMsgResult>(qname, this->targetTable,
                                        "No such table."s);

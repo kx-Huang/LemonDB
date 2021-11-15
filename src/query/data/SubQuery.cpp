@@ -4,12 +4,11 @@
 #include "../../db/Database.h"
 #include "../../multithreads/MultiThread.hpp"
 
-
 /**********************************************/
 /*Define Global Varaibles*/
 
 static size_t counter;
-//static unsigned int current_thread;
+// static unsigned int current_thread;
 static unsigned int total_thread;
 static unsigned int subtable_num;
 
@@ -72,12 +71,12 @@ QueryResult::Ptr SubQuery::execute() {
       copy_table = &table;
       copy_this = this;
       subtable_num = (unsigned int)(table.size()) / total_thread;
-      std::vector<std::future<int>> futures((unsigned long)total_thread);
-      for(int i = 0; i<(int)total_thread - 1; i++){
+      vector<future<int>> futures((unsigned long)total_thread);
+      for (int i = 0; i < (int)total_thread - 1; i++) {
         futures[(unsigned long)i] = worker.Submit(Sub_SubQuery, i);
       }
-      counter = (size_t) Sub_SubQuery((int)total_thread - 1);
-      for (int i = 0; i<(int)total_thread - 1;i++){
+      counter = (size_t)Sub_SubQuery((int)total_thread - 1);
+      for (int i = 0; i < (int)total_thread - 1; i++) {
         counter = counter + (size_t)futures[(unsigned long)i].get();
       }
     }
