@@ -7,7 +7,6 @@
 /**********************************************/
 /*Define Global Varaibles*/
 constexpr const char *CountQuery::qname;
-static size_t counter;
 static unsigned int total_thread;
 static unsigned int subtable_num;
 static Table *copy_table;
@@ -42,27 +41,25 @@ QueryResult::Ptr CountQuery::execute() {
   try {
     auto &table = db[this->targetTable];
     result = initCondition(table);
-    counter = 0;
+    int counter = 0;
     total_thread = (unsigned int)worker.Thread_count();
     copy_operand = &this->operands;
-    if (total_thread < 2 || table.size() < 16) {
+    if (total_thread < 2 || table.size() < 2000) {
       if (result.second) {
         for (auto it = table.begin(); it != table.end(); ++it)
           if (this->evalCondition(*it))
             counter++;
       }
     } else {
+      total_thread = (unsigned int)(table.size() / 2000 + 1);
       copy_table = &table;
       copy_this = this;
       subtable_num = (unsigned int)(table.size()) / total_thread;
       vector<future<int>> futures((unsigned long)total_thread);
-      for (int i = 0; i < (int)total_thread - 1; i++) {
+      for (int i = 0; i < (int)total_thread; i++)
         futures[(unsigned long)i] = worker.Submit(Sub_Count, i);
-      }
-      counter = (size_t)Sub_Count((int)total_thread - 1);
-      for (unsigned long i = 0; i < (unsigned long)total_thread - 1; i++) {
-        counter = counter + (size_t)futures[i].get();
-      }
+      for (unsigned long i = 0; i < (unsigned long)total_thread; i++)
+        counter = counter + futures[i].get();
     }
     return make_unique<SuccessMsgResult>(counter);
   } catch (const TableNameNotFound &e) {

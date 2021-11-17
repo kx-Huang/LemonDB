@@ -57,11 +57,10 @@ QueryResult::Ptr MinQuery::execute() {
     auto &table = db[this->targetTable];
     result = initCondition(table);
     int_arr = new int[(this->operands).size()];
-    // total_thread = (unsigned int)worker.Thread_count();
-    total_thread = 4;
+    total_thread = (unsigned int)worker.Thread_count();
     for (size_t i(0); i < this->operands.size(); i++)
       int_arr[i] = INT32_MAX;
-    if (total_thread < 2 || table.size() < 16) {
+    if (total_thread < 2 || table.size() < 2000) {
       if (result.second) {
         for (auto row = table.begin(); row != table.end(); ++row) {
           if (this->evalCondition(*row)) {
@@ -75,18 +74,16 @@ QueryResult::Ptr MinQuery::execute() {
         }
       }
     } else {
+      total_thread = (unsigned int)(table.size() / 2000 + 1);
       copy_table = &table;
       copy_this = this;
       copy_operand = &this->operands;
       subtable_num = (unsigned int)(table.size()) / total_thread;
       vector<future<void>> futures((unsigned long)total_thread);
-      for (int i = 0; i < (int)total_thread - 1; i++) {
+      for (int i = 0; i < (int)total_thread; i++)
         futures[(unsigned long)i] = worker.Submit(Sub_min, i);
-      }
-      Sub_min((int)total_thread - 1);
-      for (unsigned long i = 0; i < (unsigned long)total_thread - 1; i++) {
+      for (unsigned long i = 0; i < (unsigned long)total_thread; i++)
         futures[i].get();
-      }
     }
     if (found)
       return make_unique<SuccessMsgResult>(int_arr, this->operands.size());

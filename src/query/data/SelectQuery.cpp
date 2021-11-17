@@ -9,18 +9,9 @@
 /*Define Global Varaibles*/
 struct prioritize {
   bool operator()(Table::Iterator &a, Table::Iterator &b) {
-    const std::string &key1(a->key()), &key2(b->key());
-    std::size_t key1_len(key1.size()), key2_len(key2.size());
-    for (std::size_t i = 0;; i++) {
-      if (i == key1_len)
-        return false;
-      if (i == key2_len)
-        return true;
-      if (key1[i] < key2[i])
-        return false;
-      if (key1[i] > key2[i])
-        return true;
-    }
+    if (a->key() < b->key())
+      return false;
+    return true;
   }
 };
 constexpr const char *SelectQuery::qname;
@@ -32,6 +23,7 @@ static std::pair<std::string, bool> result;
 using namespace std;
 static priority_queue<Table::Iterator, vector<Table::Iterator>, prioritize>
     priorityQueue;
+static std::mutex m_mutex;
 /**********************************************/
 
 void Sub_Select(int id) {
@@ -40,11 +32,13 @@ void Sub_Select(int id) {
                                           : head + (int)subtable_num;
   if (result.second) {
     for (auto item = head; item != tail; item++) {
-      if (copy_this->evalCondition(*item) == true)
+      if (copy_this->evalCondition(*item) == true) {
+        m_mutex.lock();
         priorityQueue.push(item);
+        m_mutex.unlock();
+      }
     }
   }
-  return;
 }
 
 QueryResult::Ptr SelectQuery::execute() {
@@ -56,23 +50,25 @@ QueryResult::Ptr SelectQuery::execute() {
     result = initCondition(table);
     total_thread = (unsigned int)worker.Thread_count();
     ostringstream oss;
-    if (result.second) {
-      for (auto it(table.begin()); it != table.end(); ++it) {
-        if (this->evalCondition(*it) == true)
-          priorityQueue.push(it);
+    if (total_thread < 2 || table.size() < 2000) {
+      if (result.second) {
+        for (auto it(table.begin()); it != table.end(); ++it) {
+          if (this->evalCondition(*it) == true)
+            priorityQueue.push(it);
+        }
+        if (priorityQueue.size() == 0)
+          return make_unique<NullQueryResult>();
       }
     } else {
+      total_thread = (unsigned int)(table.size() / 2000 + 1);
       copy_table = &table;
       copy_this = this;
       subtable_num = (unsigned int)(table.size()) / total_thread;
       vector<std::future<void>> futures((unsigned long)total_thread);
-      for (int i = 0; i < (int)total_thread - 1; i++) {
+      for (int i = 0; i < (int)total_thread; i++)
         futures[(unsigned long)i] = worker.Submit(Sub_Select, i);
-      }
-      Sub_Select((int)total_thread - 1);
-      for (unsigned long i = 0; i < (unsigned long)total_thread - 1; i++) {
+      for (unsigned long i = 0; i < (unsigned long)total_thread; i++)
         futures[i].get();
-      }
     }
     if (priorityQueue.size() == 0)
       return make_unique<NullQueryResult>();

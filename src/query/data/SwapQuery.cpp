@@ -11,7 +11,6 @@ static unsigned int subtable_num;
 static Table *copy_table;
 static ComplexQuery *copy_this;
 static std::pair<std::string, bool> result;
-static int counter;
 /**********************************************/
 
 int Sub_Swap(int id, size_t fid1, size_t fid2) {
@@ -42,12 +41,12 @@ QueryResult::Ptr SwapQuery::execute() {
   try {
     auto &table = db[this->targetTable];
     result = initCondition(table);
-    counter = 0;
+    int counter = 0;
     total_thread = (unsigned int)worker.Thread_count();
     fid1 = table.getFieldIndex(this->operands[0]);
     fid2 = table.getFieldIndex(this->operands[1]);
     auto result = initCondition(table);
-    if (total_thread < 2 || table.size() < 16) {
+    if (total_thread < 2 || table.size() < 2000) {
       if (result.second) {
         for (auto it = table.begin(); it != table.end(); ++it) {
           if (this->evalCondition(*it)) {
@@ -59,17 +58,15 @@ QueryResult::Ptr SwapQuery::execute() {
         }
       }
     } else {
+      total_thread = (unsigned int)(table.size() / 2000 + 1);
       copy_table = &table;
       copy_this = this;
       subtable_num = (unsigned int)(table.size()) / total_thread;
       vector<future<int>> futures((unsigned long)total_thread);
-      for (int i = 0; i < (int)total_thread - 1; i++) {
+      for (int i = 0; i < (int)total_thread; i++)
         futures[(unsigned long)i] = worker.Submit(Sub_Swap, i, fid1, fid2);
-      }
-      counter = Sub_Swap((int)total_thread - 1, fid1, fid2);
-      for (unsigned long i = 0; i < (unsigned long)total_thread - 1; i++) {
+      for (unsigned long i = 0; i < (unsigned long)total_thread; i++)
         counter = counter + futures[i].get();
-      }
     }
     return make_unique<RecordCountResult>((size_t)counter);
   } catch (const TableNameNotFound &e) {

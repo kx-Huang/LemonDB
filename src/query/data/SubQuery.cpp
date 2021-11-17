@@ -6,9 +6,6 @@
 
 /**********************************************/
 /*Define Global Varaibles*/
-
-static size_t counter;
-// static unsigned int current_thread;
 static unsigned int total_thread;
 static unsigned int subtable_num;
 
@@ -52,9 +49,8 @@ QueryResult::Ptr SubQuery::execute() {
     auto &table = db[this->targetTable];
     result = initCondition(table);
     total_thread = (unsigned int)worker.Thread_count();
-    counter = 0;
-    copy_operand = &this->operands;
-    if (table.size() < 16 || total_thread < 2) {
+    int counter = 0;
+    if (total_thread < 2 || table.size() < 2000) {
       if (result.second) {
         for (auto it = table.begin(); it != table.end(); ++it) {
           if (this->evalCondition(*it)) {
@@ -68,17 +64,16 @@ QueryResult::Ptr SubQuery::execute() {
         }
       }
     } else {
+      total_thread = (unsigned int)(table.size() / 2000 + 1);
       copy_table = &table;
       copy_this = this;
+      copy_operand = &this->operands;
       subtable_num = (unsigned int)(table.size()) / total_thread;
       vector<future<int>> futures((unsigned long)total_thread);
-      for (int i = 0; i < (int)total_thread - 1; i++) {
+      for (int i = 0; i < (int)total_thread; i++)
         futures[(unsigned long)i] = worker.Submit(Sub_SubQuery, i);
-      }
-      counter = (size_t)Sub_SubQuery((int)total_thread - 1);
-      for (int i = 0; i < (int)total_thread - 1; i++) {
-        counter = counter + (size_t)futures[(unsigned long)i].get();
-      }
+      for (int i = 0; i < (int)total_thread; i++)
+        counter = counter + futures[(unsigned long)i].get();
     }
     return make_unique<RecordCountResult>(counter);
 

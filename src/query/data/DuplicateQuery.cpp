@@ -4,7 +4,6 @@
 
 /**********************************************/
 /*Define Global Varaibles*/
-static size_t counter;
 static unsigned int total_thread;
 static unsigned int subtable_num;
 static Table *copy_table;
@@ -12,7 +11,7 @@ static ComplexQuery *copy_this;
 static std::pair<std::string, bool> result;
 static std::vector<Table::KeyType> keys;
 struct Ret_Dup {
-  size_t subcounter;
+  int subcounter;
   std::vector<Table::KeyType> sub_keys;
 };
 /**********************************************/
@@ -24,7 +23,7 @@ Ret_Dup Sub_Duplicate(int id) {
   Ret_Dup temp;
   if (result.second) {
     std::vector<Table::KeyType> sub_keys;
-    size_t sub_counter = 0;
+    int sub_counter = 0;
     for (auto it = head; it != tail; it++) {
       auto key = it->key();
       if (copy_this->evalCondition(*it) && copy_table->evalDuplicate(key)) {
@@ -50,9 +49,9 @@ QueryResult::Ptr DuplicateQuery::execute() {
     auto &table = db[this->targetTable];
     result = initCondition(table);
     total_thread = (unsigned int)worker.Thread_count();
-    counter = 0;
+    int counter = 0;
     keys.clear();
-    if (total_thread < 2 || table.size() < 16) {
+    if (total_thread < 2 || table.size() < 2000) {
       if (result.second) {
         auto end = table.end();
         for (auto it = table.begin(); it != end; it++) {
@@ -66,18 +65,15 @@ QueryResult::Ptr DuplicateQuery::execute() {
           table.duplicateByKey(*it);
       }
     } else {
+      total_thread = (unsigned int)(table.size() / 2000 + 1);
       copy_table = &table;
       copy_this = this;
       subtable_num = (unsigned int)(table.size()) / total_thread;
       vector<future<Ret_Dup>> futures((unsigned long)total_thread);
-      for (int i = 0; i < (int)total_thread - 1; i++) {
+      for (int i = 0; i < (int)total_thread; i++)
         futures[(unsigned long)i] = worker.Submit(Sub_Duplicate, i);
-      }
-      Ret_Dup temp = Sub_Duplicate((int)total_thread - 1);
-      counter = temp.subcounter;
-      keys.insert(keys.end(), temp.sub_keys.begin(), temp.sub_keys.end());
-      for (unsigned long i = 0; i < (unsigned long)total_thread - 1; i++) {
-        temp = futures[i].get();
+      for (unsigned long i = 0; i < (unsigned long)total_thread; i++) {
+        Ret_Dup temp = futures[i].get();
         keys.insert(keys.end(), temp.sub_keys.begin(), temp.sub_keys.end());
         counter = counter + temp.subcounter;
       }
