@@ -24,6 +24,7 @@ echo "==========================================================================
 # run
 mkdir -p sample_dump
 mkdir -p sample_stdout
+mkdir -p sample_stderr
 shopt -s nullglob
 TIMEFORMAT=%R
 printf "[Running] testing lemondb...\n\n"
@@ -32,7 +33,7 @@ printf " ----------------------------------- \n"
 total_time=0
 for q in ../$path/*.query ; do
     filename=$(basename "$q" | cut -d. -f1)
-    real_time=$( { time ../build/lemondb --thread 4 <$q 1>"../test/sample_stdout/${filename}.out" 2>/dev/null; } 2>&1 )
+    real_time=$( { time ../build/lemondb --thread 0 <$q 1>"../test/sample_stdout/${filename}.out" 2>"../test/sample_stderr/${filename}.out"; } 2>&1 )
     total_time=$(echo $total_time+$real_time | bc)
     printf "  %-20s   %-10s  \n" $filename $real_time
     # diff dump file with reference dump file
