@@ -20,8 +20,8 @@ static unsigned int subtable_num;
 static Table *copy_table;
 static ComplexQuery *copy_this;
 static std::pair<std::string, bool> result;
-using namespace std;
-static priority_queue<Table::Iterator, vector<Table::Iterator>, prioritize>
+static std::priority_queue<Table::Iterator, std::vector<Table::Iterator>,
+                           prioritize>
     priorityQueue;
 static std::mutex m_mutex;
 /**********************************************/
