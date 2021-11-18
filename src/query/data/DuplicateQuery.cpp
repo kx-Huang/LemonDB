@@ -2,6 +2,8 @@
 #include "../../db/Database.h"
 #include "../../multithreads/MultiThread.hpp"
 
+#include <algorithm>
+
 /**********************************************/
 /*Define Global Varaibles*/
 static unsigned int total_thread;
@@ -9,7 +11,6 @@ static unsigned int subtable_num;
 static Table *copy_table;
 static ComplexQuery *copy_this;
 static std::pair<std::string, bool> result;
-static std::vector<Table::KeyType> keys;
 struct Ret_Dup {
   int subcounter;
   std::vector<Table::KeyType> sub_keys;
@@ -50,7 +51,7 @@ QueryResult::Ptr DuplicateQuery::execute() {
     result = initCondition(table);
     total_thread = (unsigned int)worker.Thread_count();
     int counter = 0;
-    keys.clear();
+    vector<Table::KeyType> keys;
     if (total_thread < 2 || table.size() < 2000) {
       if (result.second) {
         auto end = table.end();
@@ -61,8 +62,6 @@ QueryResult::Ptr DuplicateQuery::execute() {
             counter++;
           }
         }
-        for (auto it = keys.begin(); it != keys.end(); it++)
-          table.duplicateByKey(*it);
       }
     } else {
       total_thread = (unsigned int)(table.size() / 2000 + 1);
@@ -74,12 +73,15 @@ QueryResult::Ptr DuplicateQuery::execute() {
         futures[(unsigned long)i] = worker.Submit(Sub_Duplicate, i);
       for (unsigned long i = 0; i < (unsigned long)total_thread; i++) {
         Ret_Dup temp = futures[i].get();
-        keys.insert(keys.end(), temp.sub_keys.begin(), temp.sub_keys.end());
+        size_t temp_size = keys.size();
+        keys.resize(temp_size + temp.sub_keys.size());
+        std::move(temp.sub_keys.begin(), temp.sub_keys.end(),
+                  keys.begin() + (long)temp_size);
         counter = counter + temp.subcounter;
       }
-      for (auto it = keys.begin(); it != keys.end(); it++)
-        table.duplicateByKey(*it);
     }
+    for (auto it = keys.begin(); it != keys.end(); it++)
+      table.duplicateByKey(*it);
     return make_unique<RecordCountResult>(counter);
   } catch (const TableNameNotFound &e) {
     return make_unique<ErrorMsgResult>(qname, this->targetTable,

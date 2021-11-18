@@ -1,8 +1,10 @@
 #ifndef SAFEQUEUE_H
 #define SAFEQUEUE_H
+
 #include <condition_variable>
 #include <mutex>
 #include <queue>
+
 template <typename T> class SafeQueue {
 private:
   // only one thread can access queue_data at a time
@@ -56,4 +58,4 @@ public:
   }
 };
 
-#endif // PROJECT_SAFEQUEUE_H
+#endif // SAFEQUEUE_H
