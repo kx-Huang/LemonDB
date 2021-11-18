@@ -87,12 +87,14 @@ if [ $read_my_query -eq 0 ]; then
         printf "LOAD %s ;\n" $table > $query
         echo $cmd >> $query
         echo "DUMP" $table_name $dump ";" >> $query
-        ../../build/lemondb --listen $query --thread 8 2>$stderr 1>$stdout
+        cd ..
+        ../build/lemondb --listen $query --thread 8 2>$stderr 1>$stdout
         awk 'NR == 3' < $stdout
         # awk 'NR >= 3' < $stderr
     done
 else
-    ../../build/lemondb --listen $query --thread 8 2>$stderr 1>$stdout
+    cd ..
+    ../build/lemondb --listen $query --thread 8 2>$stderr 1>$stdout
     echo "================================================================================="
     echo "[Log] stderr:"
     grep -v "^$" $stderr

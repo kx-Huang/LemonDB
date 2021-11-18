@@ -4,13 +4,14 @@
 
 #include <getopt.h>
 
+#include "multithreads/MultiThread.hpp"
+#include "query/QueryBuilders.h"
+#include "query/QueryParser.h"
+
 #include <fstream>
 #include <iostream>
 #include <string>
 #include <thread>
-#include "multithreads/MultiThread.hpp"
-#include "query/QueryBuilders.h"
-#include "query/QueryParser.h"
 
 Thread_Pool::Thread_Pool worker;
 
@@ -107,75 +108,76 @@ int main(int argc, char *argv[]) {
   p.registerQueryBuilder(std::make_unique<QueryBuilder(Complex)>());
 
   size_t counter = 0;
-  std::vector<std::istream*>inputlist; 
+  std::vector<std::istream *> inputlist;
   inputlist.push_back(&is);
-    while (!inputlist.empty()) {
-        try {
-            // A very standard REPL
-            // REPL: Read-Evaluate-Print-Loop
-            
-            std::string queryStr = extractQueryString(*inputlist.back());
-            if(queryStr.find("LISTEN") != std::string::npos){
-                
-                // Get the path name
-                std::stringstream temp;
-                temp.str(queryStr);
-                std::string a, b, c;
-                temp >> a >> b >> queryStr >> c;
+  while (!inputlist.empty()) {
+    try {
+      // A very standard REPL
+      // REPL: Read-Evaluate-Print-Loop
 
-                // Open the path to see whether succeeds or not
-                std::fstream* newfile = new std::fstream;
-                newfile->open(queryStr);  
-                if (!newfile->is_open()){
-                    std::cerr << "Error: could not open " << queryStr <<  "\n";
-                    exit(-1);                        
-                }
+      std::string queryStr = extractQueryString(*inputlist.back());
+      if (queryStr.find("LISTEN") != std::string::npos) {
 
-                // Put the queries in the files to the inputvector
-                std::istream* new_input = new std::istream(newfile->rdbuf());
-                inputlist.push_back(new_input);
-                
-                //Get the filename excluding the path
-                int index;
-                for(index = (int)queryStr.length()-1; index > -1; index--){
-                    if(queryStr[(size_t)index] =='/') break;
-                } 
-                std::string filename = queryStr.substr((size_t)index+1, queryStr.length()-(size_t)index);
-                std::cout << ++counter << "\nANSWER = ( listening from " << filename << " )\n"; 
-                continue;
-            }
+        // Get the path name
+        std::stringstream temp;
+        temp.str(queryStr);
+        std::string a, b, c, path;
+        temp >> a >> b >> path >> c;
 
-            Query::Ptr query = p.parseQuery(queryStr);
-
-            QueryResult::Ptr result = query->execute();
-
-            std::cout << ++counter << "\n";
-            
-            if (result->success()) {
-                if (result->display()) {
-                    std::cout <<*result;
-                    //std::cout.flush();
-                } else {
-                }
-            } else {
-                std::cout.flush();
-                std::cerr << "QUERY FAILED:\n\t" << *result;
-            }
-        }  catch (const std::ios_base::failure& e) {
-            if(inputlist.size() == 1)
-                break;
-            else{
-                if(inputlist.size() > 1)
-                    delete inputlist.back();
-                inputlist.pop_back();
-                continue;
-            }
-        } catch (const std::exception& e) {
-            std::cout.flush();
-            std::cerr << e.what() << std::endl;
+        // Open the path to see whether succeeds or not
+        std::fstream *newfile = new std::fstream;
+        newfile->open(path);
+        if (!newfile->is_open()) {
+          std::cerr << "Error: could not open " << path << "\n";
+          exit(-1);
         }
+
+        // Put the queries in the files to the inputvector
+        std::istream *new_input = new std::istream(newfile->rdbuf());
+        inputlist.push_back(new_input);
+
+        // Get the filename excluding the path
+        int index;
+        for (index = (int)path.length() - 1; index > -1; index--)
+          if (path[(size_t)index] == '/')
+            break;
+        std::string filename =
+            path.substr((size_t)index + 1, path.length() - (size_t)index);
+        std::cout << ++counter << "\nANSWER = ( listening from " << filename
+                  << " )\n";
+        continue;
+      }
+
+      Query::Ptr query = p.parseQuery(queryStr);
+
+      QueryResult::Ptr result = query->execute();
+
+      std::cout << ++counter << "\n";
+
+      if (result->success()) {
+        if (result->display()) {
+          std::cout << *result;
+          // std::cout.flush();
+        }
+      } else {
+        std::cout.flush();
+        std::cerr << "QUERY FAILED:\n\t" << *result;
+      }
+    } catch (const std::ios_base::failure &e) {
+      if (inputlist.size() == 1) {
+        break;
+      } else {
+        if (inputlist.size() > 1)
+          delete inputlist.back();
+        inputlist.pop_back();
+        continue;
+      }
+    } catch (const std::exception &e) {
+      std::cout.flush();
+      std::cerr << e.what() << std::endl;
     }
-    std::cout.flush();
-    pthread_exit(NULL);
-    return 0;
+  }
+  std::cout.flush();
+  pthread_exit(NULL);
+  return 0;
 }
