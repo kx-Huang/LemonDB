@@ -2,6 +2,10 @@
 
 [![Build Status](https://focs.ji.sjtu.edu.cn:2222/api/badges/ve482-21/p2-group-06/status.svg?ref=refs/heads/multi_threads)](https://focs.ji.sjtu.edu.cn:2222/ve482-21/p2-group-06)
 
+## Remarks
+
+This project is a course project in `VE482 Operating System` [@UM-SJTU Joint Institute](https://www.ji.sjtu.edu.cn/).
+
 ## Introduction
 
 - ./src
