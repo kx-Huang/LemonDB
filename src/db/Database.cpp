@@ -180,6 +180,3 @@ void Database::exit() {
   // Might cause problem ...
   std::exit(0);
 }
-
-
-

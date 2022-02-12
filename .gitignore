@@ -98,6 +98,7 @@ cmake-build-release
 /test/ref_stdout/
 /test/sample_dump/
 /test/sample_stdout/
+/test/sample_stderr/
 /test/unit_test*
 /single_sample
 
