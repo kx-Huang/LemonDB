@@ -1,12 +1,8 @@
-# LemonDB: An In-memory Multi-threading Database
+# LemonDB: An Multi-threading Database written in C++
 
-[![Build Status](https://focs.ji.sjtu.edu.cn:2222/api/badges/ve482-21/p2-group-06/status.svg?ref=refs/heads/multi_threads)](https://focs.ji.sjtu.edu.cn:2222/ve482-21/p2-group-06)
-
-## Remarks
+# Documentation ![Build Status](https://focs.ji.sjtu.edu.cn:2222/api/badges/ve482-21/p2-group-06/status.svg?ref=refs/heads/multi_threads) ![Read Count](https://visitor-badge.glitch.me/badge?page_id=kx-Huang.LemonDB&left_color=gray&right_color=blue)
 
 This project is a course project in *VE482 Operating System* [@UM-SJTU Joint Institute](https://www.ji.sjtu.edu.cn/). In general, we implement an in-memory database `LemonDB` using C++ featured multi-threading.
-
-## Documentation
 
 For this documentation, we focus on mainly 4 points:
   1. Architecture Design: Thread Pool
@@ -15,7 +11,7 @@ For this documentation, we focus on mainly 4 points:
   4. Future Improvement: Scheduler and Concurrency Query
 
 ### 1. Thread Pool
-The thread pool is defined in the file `/src/multithreads/MultiThread.hpp`. Here are the members of the class Thread_Pool:
+The thread pool is defined in the file `/src/multithreads/MultiThread.hpp`. Here are the members of the class `Thread_Pool`:
 ```cpp
 class Thread_Pool {
 private:
