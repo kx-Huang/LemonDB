@@ -1,4 +1,4 @@
-# LemonDB: An In-memory Database with Multi-threading Query
+# LemonDB: An In-memory Multi-threading Database
 
 [![Build Status](https://focs.ji.sjtu.edu.cn:2222/api/badges/ve482-21/p2-group-06/status.svg?ref=refs/heads/multi_threads)](https://focs.ji.sjtu.edu.cn:2222/ve482-21/p2-group-06)
 
