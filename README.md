@@ -10,7 +10,7 @@ For this documentation, we focus on mainly 4 points:
   3. Performance Improvements: Complexity, `std::future` and Partition Strategy
   4. Future Improvement: Scheduler and Concurrency Query
 
-### 1. Thread Pool
+## 1. Thread Pool
 The thread pool is defined in the file `/src/multithreads/MultiThread.hpp`. Here are the members of the class `Thread_Pool`:
 ```cpp
 class Thread_Pool {
@@ -46,7 +46,7 @@ public:
 - Upon construction, the thread pool creates the threads and stores them in the `pool_vector`, where the number of threads is either `std::thread::hardware_concurrency()` or the user input.
 - Once initialized, the worker threads start running the function `void scheduler()`, in which the worker thread loops to get the first task from the `Task_assemble` and executes the task, until all tasks are finished.
 
-### 2. Partition Programming
+## 2. Partition Programming
 
 We found that the tables usually feature very large sizes, and most of the queries, other than `LOAD, DUMP, COPYTABLE ... ` queries for table management, data queries `SELECT, SUM, MIN, ...` must traverse the table row by row. Consequentially, traversing data queries with single thread account for much time of execution.
 
@@ -91,9 +91,9 @@ for (int i = 0; i < (int)total_thread; i++)
     counter = counter + futures[i].get();
   ```
 
-### 3. Performance Improvements
+## 3. Performance Improvements
 
-#### 3.1 Complexity
+### 3.1 Complexity
 
 To optimize the runtime, no matter in single thread or multi-threading version, we must ensure the time complexity of executing a query is O(n), where n is the number of table's row. However, at first we unconsciously invoke an O(n^2) time complexity by using the `erase()` method in `std::vector`.
 
@@ -108,7 +108,7 @@ data[index] = std::move(data.back());
 data.pop_back();
 ```
 
-#### 3.2 `std::future`
+### 3.2 `std::future`
 
 As we all know, when multi-threading, modify a common global variable is dangerous. To prevent race condition, we need to use mutex. However, the method `lock()` and `unlock()` is quite time-consuming. To prevent the lock as much as possible without invoking race condition, we use `std::future` in thread pool. Generally, it reserves position for functions returned in future when submitting multi-threading tasks. Then, we could get the result as long as the function submitted to worker threads returns, and add them up to get the final result.
 
@@ -124,7 +124,7 @@ for (size_t i = 0; i < total_thread; i++)
   counter = counter + futures[i].get();
 ```
 
-#### 3.3 Partition Strategy
+### 3.3 Partition Strategy
 
 With the thread pool structure and partition programming, another factors that affect the run-time is the partition fraction. It is obvious that keeping a lot of thread alive is resources- and time-consuming, while a small fraction such as only dividing table into 2 parts may lead to fewer efficiency improvement. With rounds of testing, we found that the consumption in time of maintaining a new worker thread is approximately equals scanning over 2000 lines. That is to say, it's better to fill one thread with 2000 lines when doing multi-threading. As a result, we only wake up the number of threads which equals to the total table size divided by 2000. Of course, this is only a rough estimation, the cost and benefit vary as many factors such as CPU performance and memory read-write performance. But on the server, it's approximately the best parameters.
 
@@ -132,7 +132,7 @@ With the thread pool structure and partition programming, another factors that a
 total_thread = table.size() / 2000 + 1;
 ```
 
-### 4. Future Improvement: Scheduler and Concurrency Query
+## 4. Future Improvement: Scheduler and Concurrency Query
 
 In this project, we take advantage of the partition programming, which uses the idea of divide and conquer with the help of multi-threading. But generally, we execute the query one by one in a primative way. Enlightening by the modern CPU of its out-of-order execution, we could even make the execution of query parallelly.
 
