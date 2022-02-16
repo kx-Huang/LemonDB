@@ -25,11 +25,11 @@ private:
   std::condition_variable cv;
   std::atomic<bool> done;
   std::atomic<int> idleThreadNum;
-  
+
   void addTask(void_Task task)
   void_Task getTask();
   void scheduler();
-  
+
 public:
   Thread_Pool();
   void pool_set(int temp);
@@ -43,7 +43,7 @@ public:
   auto Submit(F &&f, Args &&...args) -> std::future<decltype(f(args...))>;
 }
 ```
-- The thread pool is used to manage all the worker threads. 
+- The thread pool is used to manage all the worker threads.
 - The thread pool is thread-safe with the protection of the mutex `lockx` and the use of `std::atomic` variables.
 - The `done` variable is used to indicate whether all job has been done.
 - The `Task_assemble` queue stores all the tasks that the worker threads need to finish, details about how the queue is filled will be explained in the next section.
@@ -52,11 +52,11 @@ public:
 
 ### 2. Partition Programming
 
-We found that the tables usually feature very large sizes, and most of the queries, other than `LOAD, DUMP, COPYTABLE ... ` queries for table management, data queries `SELECT, SUM, MIN, ...` must traverse the table row by row. Consequentially, traversing data queries with single thread account for much time of execution. 
+We found that the tables usually feature very large sizes, and most of the queries, other than `LOAD, DUMP, COPYTABLE ... ` queries for table management, data queries `SELECT, SUM, MIN, ...` must traverse the table row by row. Consequentially, traversing data queries with single thread account for much time of execution.
 
 Based on this observation, we decide to divide the large table into several sub table section according to the number of available threads. All the threads is assigned with a task to execute the query on the sub table at the same time. In this way, the table could be traversed parallelly and save a lot of time.
 
-A typically example of `count` is shown below. 
+A typically example of `count` is shown below.
 
 ```cpp
 subtable_num = (unsigned int)(table.size()) / total_thread;
@@ -89,7 +89,7 @@ for (int i = 0; i < (int)total_thread; i++)
   ```
 
 - In the main thread, it will wait until all the threads finish its work and then combine the result. Take `COUNT` query as example, the partional count result returned by each thread could be accessed by `get()` method in `std::future`, which would be added up in `counter` to get the final query result.
-  
+
   ```cpp
   for (size_t i = 0; i < total_thread; i++)
     counter = counter + futures[i].get();
