@@ -1,6 +1,6 @@
 # LemonDB: An Multi-threading Database written in C++
 
-# ![](https://visitor-badge.glitch.me/badge?page_id=kx-Huang.LemonDB&left_color=gray&right_color=blue)
+# Documentatioin ![](https://visitor-badge.glitch.me/badge?page_id=kx-Huang.LemonDB&left_color=gray&right_color=blue)
 
 This project is a course project in *VE482 Operating System* [@UM-SJTU Joint Institute](https://www.ji.sjtu.edu.cn/). In general, we implement an in-memory database `LemonDB` using C++ featured multi-threading.
 
